@@ -1,0 +1,146 @@
+<resources>
+    <string name="app_name">WeedX</string>
+    <string name="precision_farming_assistant">Precision Farming Assistant</string>
+    <string name="precision_farming_dashboard">Precision Farming Dashboard</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="demo_credentials">Demo Credentials:</string>
+    <string name="demo_email">Email: admin@weedx.com</string>
+    <string name="demo_password">Password: admin123</string>
+    <string name="email_address">Email Address</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="powered_by">Powered by precision agriculture technology</string>
+    <string name="email_hint">john@example.com</string>
+    <string name="password_hint">•••••</string>
+    
+    <!-- Dashboard -->
+    <string name="live">Live</string>
+    <string name="robot_status">Robot Status</string>
+    <string name="active_in_field">Active in Field A</string>
+    <string name="battery">Battery</string>
+    <string name="location">Location</string>
+    <string name="speed">Speed</string>
+    <string name="todays_summary">Today\'s Summary</string>
+    <string name="weeds_detected">Weeds Detected</string>
+    <string name="last_updated">Last updated 2 min ago</string>
+    <string name="herbicide_used">Herbicide Used</string>
+    <string name="targeted_treatment">Targeted treatment</string>
+    <string name="area_covered">Area Covered</string>
+    <string name="hours_active">4.2 hours active</string>
+    <string name="recent_alerts">Recent Alerts</string>
+    
+    <!-- Assistant -->
+    <string name="weedx_assistant">WeedX Assistant</string>
+    <string name="ask_me_anything">Ask me anything</string>
+    <string name="assistant_greeting">Hello! I can help you with information about your robot and weed detection data. What would you like to know?</string>
+    <string name="suggested_questions">Suggested questions:</string>
+    <string name="question_weeds_today">How many weeds detected today?</string>
+    <string name="question_battery_status">Show battery status</string>
+    <string name="question_robot_doing">What is the robot doing now?</string>
+    <string name="question_weekly_summary">Weekly summary report</string>
+    <string name="input_hint">Ask a question...</string>
+    <string name="send">Send</string>
+    
+    <!-- Live Monitoring -->
+    <string name="live_monitoring">Live Monitoring</string>
+    <string name="real_time_robot_activity">Real-time robot activity</string>
+    <string name="robot_active">Robot Active</string>
+    <string name="field_zone">Field A, Zone 12</string>
+    <string name="current_speed">Current Speed</string>
+    <string name="uptime_today">Uptime Today</string>
+    <string name="battery_label">Battery</string>
+    <string name="hours_remaining">~3.5 hours remaining</string>
+    <string name="herbicide_label">Herbicide</string>
+    <string name="tank_capacity">Tank capacity 68%</string>
+    <string name="coverage_label">Coverage</string>
+    <string name="todays_progress">Today\'s progress</string>
+    <string name="efficiency_label">Efficiency</string>
+    <string name="detection_accuracy">Detection accuracy</string>
+    <string name="activity_timeline">Activity Timeline</string>
+    <string name="weed_cluster_detected">Weed cluster detected</string>
+    <string name="weeds_treated">17 weeds treated</string>
+    <string name="zone_transition">Zone transition</string>
+    <string name="moving_from_zone">Moving from A-11 to A-12</string>
+    <string name="high_density_area">High density area</string>
+    <string name="weeds_in_area">47 weeds detected in 50m²</string>
+    <string name="session_started">Session started</string>
+    <string name="field_operation">Field A operation begin</string>
+    <string name="minutes_ago">%d minutes ago</string>
+    <string name="hours_ago">%d hours ago</string>
+    
+    <!-- Weed Logs -->
+    <string name="weed_logs">Weed Logs</string>
+    <string name="detection_history_records">Detection history and records</string>
+    <string name="search_hint">Search weeds...</string>
+    <string name="filter">Filter</string>
+    <string name="today">Today</string>
+    <string name="this_week">This Week</string>
+    <string name="treated">Treated</string>
+    <string name="weeds_detected_count">%d weeds detected</string>
+    <string name="zone_location">Zone %s</string>
+    <string name="time_ago_min">%d min ago</string>
+    <string name="dandelion">Dandelion</string>
+    <string name="crabgrass">Crabgrass</string>
+    <string name="thistle">Thistle</string>
+    <string name="pigweed">Pigweed</string>
+    
+    <!-- Image Gallery -->
+    <string name="image_gallery">Image Gallery</string>
+    <string name="weed_detection_captures">Weed detection captures</string>
+    
+    <!-- Reports -->
+    <string name="reports">Reports</string>
+    <string name="performance_analytics">Performance analytics</string>
+    <string name="weekly">Weekly</string>
+    <string name="monthly">Monthly</string>
+    <string name="download">Download</string>
+    <string name="total_weeds">Total Weeds</string>
+    <string name="vs_last_week">%d%% vs last week</string>
+    <string name="vs_last_month">%d%% vs last month</string>
+    <string name="area_covered_label">Area Covered</string>
+    <string name="herbicide_used_label">Herbicide Used</string>
+    <string name="efficiency">Efficiency</string>
+    <string name="weed_detection_trend">Weed Detection Trend</string>
+    <string name="weed_type_distribution">Weed Type Distribution</string>
+    <string name="mon">Mon</string>
+    <string name="tue">Tue</string>
+    <string name="wed">Wed</string>
+    <string name="thu">Thu</string>
+    <string name="fri">Fri</string>
+    <string name="sat">Sat</string>
+    <string name="sun">Sun</string>
+    
+    <!-- Weather & Soil Screen -->
+    <string name="weather_soil">Weather &amp; Soil</string>
+    <string name="environmental_conditions">Environmental conditions</string>
+    <string name="current_weather">Current Weather</string>
+    <string name="partly_cloudy">Partly Cloudy</string>
+    <string name="wind">Wind</string>
+    <string name="uv_index">UV Index</string>
+    <string name="seven_day_forecast">7-Day Forecast</string>
+    <string name="soil_conditions">Soil Conditions</string>
+    <string name="weather_icon">Weather Icon</string>
+
+    <!-- Profile Screen -->
+    <string name="profile">Profile</string>
+    <string name="account_settings_preferences">Account settings and preferences</string>
+    <string name="profile_picture">Profile Picture</string>
+    <string name="member_since_jan_2024">Member since Jan 2024</string>
+    <string name="farm_information">Farm Information</string>
+    <string name="farm_name">Farm Name</string>
+    <string name="total_area">Total Area</string>
+    <string name="robot_id">Robot ID</string>
+    <string name="notifications">Notifications</string>
+    <string name="app_settings">App Settings</string>
+    <string name="help_support">Help &amp; Support</string>
+    <string name="log_out">Log Out</string>
+    <string name="app_version">WeedX v1.0.0</string>
+    
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_weather">Weather</string>
+    <string name="nav_assistant">Assistant</string>
+    <string name="nav_images">Images</string>
+    <string name="nav_profile">Profile</string>
+</resources>
