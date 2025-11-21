@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# WeedX Backend Deployment Script for Arch Linux
-# This script automates the deployment of WeedX backend to /srv/http/
+# WeedX Backend Deployment Script for Debian/Ubuntu/Raspberry Pi OS
+# This script automates the deployment of WeedX backend to /var/www/html/
 
 set -e  # Exit on error
 
@@ -24,29 +24,29 @@ fi
 
 # Get the script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-BACKEND_SRC="$SCRIPT_DIR/xampp/htdocs/backend"
-BACKEND_DEST="/srv/http/weedx-backend"
+BACKEND_SRC="$SCRIPT_DIR/../xampp/htdocs/backend"
+BACKEND_DEST="/var/www/html/weedx-backend"
 
 echo -e "${YELLOW}Step 1: Checking prerequisites...${NC}"
 
 # Check if Apache is installed
-if ! command -v httpd &> /dev/null; then
-    echo -e "${RED}Apache (httpd) is not installed!${NC}"
-    echo "Install it with: sudo pacman -S apache"
+if ! command -v apache2 &> /dev/null; then
+    echo -e "${RED}Apache2 is not installed!${NC}"
+    echo "Install it with: sudo apt install apache2"
     exit 1
 fi
 
-# Check if MariaDB is installed
+# Check if MariaDB/MySQL is installed
 if ! command -v mysql &> /dev/null; then
-    echo -e "${RED}MariaDB is not installed!${NC}"
-    echo "Install it with: sudo pacman -S mariadb"
+    echo -e "${RED}MariaDB/MySQL is not installed!${NC}"
+    echo "Install it with: sudo apt install mariadb-server"
     exit 1
 fi
 
 # Check if PHP is installed
 if ! command -v php &> /dev/null; then
     echo -e "${RED}PHP is not installed!${NC}"
-    echo "Install it with: sudo pacman -S php php-apache"
+    echo "Install it with: sudo apt install php libapache2-mod-php php-mysql php-curl php-json php-mbstring"
     exit 1
 fi
 
@@ -74,8 +74,8 @@ echo ""
 
 echo -e "${YELLOW}Step 3: Setting permissions...${NC}"
 
-# Set ownership
-sudo chown -R http:http "$BACKEND_DEST"
+# Set ownership (www-data is the default Apache user on Debian)
+sudo chown -R www-data:www-data "$BACKEND_DEST"
 sudo chmod -R 755 "$BACKEND_DEST"
 
 # Create upload directories
@@ -88,20 +88,22 @@ echo ""
 
 echo -e "${YELLOW}Step 4: Checking Apache configuration...${NC}"
 
-# Check if mod_rewrite is enabled
-if ! httpd -M 2>/dev/null | grep -q "rewrite_module"; then
-    echo -e "${YELLOW}⚠ mod_rewrite is not enabled${NC}"
-    echo "Enable it in /etc/httpd/conf/httpd.conf:"
-    echo "  LoadModule rewrite_module modules/mod_rewrite.so"
+# Enable mod_rewrite if not already enabled
+if ! apache2ctl -M 2>/dev/null | grep -q "rewrite_module"; then
+    echo -e "${YELLOW}Enabling mod_rewrite...${NC}"
+    sudo a2enmod rewrite
 fi
 
-# Check AllowOverride
-if ! grep -q "AllowOverride All" /etc/httpd/conf/httpd.conf; then
-    echo -e "${YELLOW}⚠ AllowOverride might not be set to 'All'${NC}"
-    echo "Update /etc/httpd/conf/httpd.conf:"
-    echo "  <Directory \"/srv/http\">"
-    echo "      AllowOverride All"
-    echo "  </Directory>"
+# Check AllowOverride in default site config
+if [ -f /etc/apache2/sites-available/000-default.conf ]; then
+    if ! grep -q "AllowOverride All" /etc/apache2/sites-available/000-default.conf; then
+        echo -e "${YELLOW}⚠ AllowOverride might not be set to 'All'${NC}"
+        echo "You may need to update /etc/apache2/sites-available/000-default.conf"
+        echo "Add inside <VirtualHost>:"
+        echo "  <Directory /var/www/html>"
+        echo "      AllowOverride All"
+        echo "  </Directory>"
+    fi
 fi
 
 echo -e "${GREEN}✓ Apache configuration checked${NC}"
@@ -110,12 +112,16 @@ echo ""
 echo -e "${YELLOW}Step 5: Starting services...${NC}"
 
 # Start Apache
-sudo systemctl start httpd
+sudo systemctl start apache2
 echo -e "${GREEN}✓ Apache started${NC}"
 
 # Start MariaDB
 sudo systemctl start mariadb
 echo -e "${GREEN}✓ MariaDB started${NC}"
+
+# Restart Apache to apply any configuration changes
+sudo systemctl restart apache2
+echo -e "${GREEN}✓ Apache restarted${NC}"
 
 echo ""
 
@@ -154,7 +160,7 @@ if [ "$RESPONSE" = "401" ] || [ "$RESPONSE" = "200" ]; then
     echo -e "${GREEN}✓ Backend is responding correctly (HTTP $RESPONSE)${NC}"
 else
     echo -e "${RED}✗ Backend returned unexpected code: HTTP $RESPONSE${NC}"
-    echo "Check Apache error log: sudo tail /var/log/httpd/error_log"
+    echo "Check Apache error log: sudo tail /var/log/apache2/error.log"
 fi
 
 echo ""
@@ -182,6 +188,10 @@ echo "    -H \"Content-Type: application/json\" \\"
 echo "    -d '{\"email\":\"admin@weedx.com\",\"password\":\"admin123\",\"firebaseToken\":\"test\"}'"
 echo ""
 echo "View logs:"
-echo "  sudo tail -f /var/log/httpd/error_log"
+echo "  sudo tail -f /var/log/apache2/error.log"
+echo ""
+echo "Enable services on boot:"
+echo "  sudo systemctl enable apache2"
+echo "  sudo systemctl enable mariadb"
 echo ""
 echo -e "${GREEN}Happy coding! 🚀${NC}"

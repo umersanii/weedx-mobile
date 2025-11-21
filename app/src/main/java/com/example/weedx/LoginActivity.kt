@@ -3,23 +3,34 @@ package com.example.weedx
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.weedx.presentation.viewmodels.LoginViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
 
+    private val viewModel: LoginViewModel by viewModels()
+    
     private lateinit var loginTab: TextView
     private lateinit var signUpTab: TextView
     private lateinit var emailInput: TextInputEditText
     private lateinit var passwordInput: TextInputEditText
     private lateinit var loginButton: MaterialButton
     private lateinit var forgotPassword: TextView
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +54,10 @@ class LoginActivity : AppCompatActivity() {
         passwordInput = findViewById(R.id.passwordInput)
         loginButton = findViewById(R.id.loginButton)
         forgotPassword = findViewById(R.id.forgotPassword)
+        progressBar = findViewById(R.id.progressBar)
+
+        // Observe login state
+        observeLoginState()
 
         // Set up tab click listeners
         loginTab.setOnClickListener {
@@ -65,6 +80,38 @@ class LoginActivity : AppCompatActivity() {
 
         // Set login tab as selected by default
         selectLoginTab()
+    }
+
+    private fun observeLoginState() {
+        lifecycleScope.launch {
+            viewModel.loginState.collect { state ->
+                when (state) {
+                    is LoginViewModel.LoginState.Idle -> {
+                        progressBar.visibility = View.GONE
+                        loginButton.isEnabled = true
+                    }
+                    is LoginViewModel.LoginState.Loading -> {
+                        progressBar.visibility = View.VISIBLE
+                        loginButton.isEnabled = false
+                    }
+                    is LoginViewModel.LoginState.Success -> {
+                        progressBar.visibility = View.GONE
+                        Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_SHORT).show()
+                        
+                        // Navigate to dashboard
+                        val intent = Intent(this@LoginActivity, DashboardActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
+                    is LoginViewModel.LoginState.Error -> {
+                        progressBar.visibility = View.GONE
+                        loginButton.isEnabled = true
+                        Toast.makeText(this@LoginActivity, state.message, Toast.LENGTH_LONG).show()
+                        emailInput.error = "Invalid credentials"
+                    }
+                }
+            }
+        }
     }
 
     private fun selectLoginTab() {
@@ -103,20 +150,8 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        // Check demo credentials
-        if (email == "admin@weedx.com" && password == "admin123") {
-            // Login successful
-            Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
-            
-            // Navigate to dashboard
-            val intent = Intent(this, DashboardActivity::class.java)
-            startActivity(intent)
-            finish()
-        } else {
-            // Show error
-            Toast.makeText(this, "Invalid credentials. Please use demo credentials.", Toast.LENGTH_SHORT).show()
-            emailInput.error = "Invalid credentials"
-        }
+        // Call ViewModel to perform login
+        viewModel.login(email, password)
     }
 
     private fun handleForgotPassword() {
