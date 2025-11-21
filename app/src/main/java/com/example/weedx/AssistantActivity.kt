@@ -8,6 +8,9 @@ import android.widget.ScrollView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -20,18 +23,29 @@ class AssistantActivity : AppCompatActivity() {
     private lateinit var messageInput: EditText
     private lateinit var sendButton: FloatingActionButton
     private lateinit var bottomNavigation: BottomNavigationView
-    
+
     private lateinit var suggestionCard1: CardView
     private lateinit var suggestionCard2: CardView
     private lateinit var suggestionCard3: CardView
     private lateinit var suggestionCard4: CardView
-    
+
     private val chatMessages = mutableListOf<ChatMessage>()
     private lateinit var chatAdapter: ChatAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Enable edge-to-edge display
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContentView(R.layout.activity_assistant)
+
+        // Handle window insets
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
         // Initialize views
         chatRecyclerView = findViewById(R.id.chatRecyclerView)
@@ -39,7 +53,7 @@ class AssistantActivity : AppCompatActivity() {
         messageInput = findViewById(R.id.messageInput)
         sendButton = findViewById(R.id.sendButton)
         bottomNavigation = findViewById(R.id.bottomNavigation)
-        
+
         suggestionCard1 = findViewById(R.id.suggestionCard1)
         suggestionCard2 = findViewById(R.id.suggestionCard2)
         suggestionCard3 = findViewById(R.id.suggestionCard3)
@@ -154,18 +168,18 @@ class AssistantActivity : AppCompatActivity() {
 
     private fun getResponseForQuestion(question: String): String {
         return when {
-            question.contains("weeds", ignoreCase = true) && 
+            question.contains("weeds", ignoreCase = true) &&
             question.contains("today", ignoreCase = true) -> {
                 "Today, 142 weeds have been detected across Field A. The detection was last updated 2 minutes ago."
             }
             question.contains("battery", ignoreCase = true) -> {
                 "The robot's battery level is at 87%. It has enough charge for approximately 4 more hours of operation."
             }
-            question.contains("robot", ignoreCase = true) && 
+            question.contains("robot", ignoreCase = true) &&
             question.contains("doing", ignoreCase = true) -> {
                 "The robot is currently active in Field A, located at position A-12. It's moving at a speed of 2.4 and actively detecting and treating weeds."
             }
-            question.contains("weekly", ignoreCase = true) || 
+            question.contains("weekly", ignoreCase = true) ||
             question.contains("summary", ignoreCase = true) -> {
                 "This week, the robot has covered 42.5 hectares, detected 856 weeds, and used 18.6L of herbicide through targeted treatment. The average efficiency is 95.2%."
             }
@@ -175,3 +189,4 @@ class AssistantActivity : AppCompatActivity() {
         }
     }
 }
+
