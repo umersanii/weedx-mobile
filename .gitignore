@@ -177,3 +177,5 @@ config.properties
 *.tmp
 *.temp
 
+
+*.pdf

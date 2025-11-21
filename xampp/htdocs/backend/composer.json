@@ -1,0 +1,14 @@
+{
+    "name": "weedx/backend",
+    "description": "REST API backend for WeedX precision farming system",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "php-mqtt/client": "^1.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "WeedX\\": "src/"
+        }
+    }
+}

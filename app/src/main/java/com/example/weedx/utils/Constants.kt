@@ -1,8 +1,10 @@
 package com.example.weedx.utils
 
 object Constants {
-    // TODO: Replace with your actual PHP backend URL
-    const val BASE_URL = "https://your-backend-url.com/api/"
+    // PHP Backend URL - update with your local IP or production server
+    // Local: http://192.168.1.8/weedx-backend/
+    // For emulator: http://10.0.2.2/weedx-backend/
+    const val BASE_URL = "http://192.168.1.8/weedx-backend/"
     
     // SharedPreferences
     const val PREFS_NAME = "weedx_prefs"
