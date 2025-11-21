@@ -628,8 +628,17 @@
                         android:textStyle="bold"
                         android:textColor="@color/black" />
 
-                    <!-- Alerts will be added dynamically or using RecyclerView -->
+                    <!-- Alerts RecyclerView -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/alertsRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:nestedScrollingEnabled="false" />
+
+                    <!-- No Alerts Text -->
                     <TextView
+                        android:id="@+id/noAlertsText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"

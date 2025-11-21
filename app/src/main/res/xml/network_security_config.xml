@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow cleartext traffic for Tailscale backend -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">raspberrypi.mullet-bull.ts.net</domain>
+        <domain includeSubdomains="true">192.168.1.8</domain>
+    </domain-config>
+    
+    <!-- Default config for all other domains -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
