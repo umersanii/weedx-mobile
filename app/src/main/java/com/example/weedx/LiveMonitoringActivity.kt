@@ -124,16 +124,16 @@ class LiveMonitoringActivity : AppCompatActivity() {
         // Update metrics
         batteryValue.text = "${data.metrics.battery}%"
         herbicideValue.text = String.format("%.1fL", data.metrics.herbicideLevel)
-        coverageValue.text = String.format("%.1fha", data.metrics.areaCovered)
+        coverageValue.text = String.format("%.1fha", data.metrics.coverage)
         efficiencyValue.text = String.format("%.0f%%", data.metrics.efficiency)
         
         // Update timeline with real data
         timelineEvents.clear()
-        data.activityTimeline.forEachIndexed { index, activity ->
+        data.activityTimeline?.forEachIndexed { index, activity ->
             timelineEvents.add(
                 TimelineEvent(
                     title = activity.action,
-                    description = activity.details ?: "",
+                    description = activity.description ?: "",
                     timeAgo = formatTimeAgo(activity.timestamp),
                     isLast = index == data.activityTimeline.size - 1
                 )
