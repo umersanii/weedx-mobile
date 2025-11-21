@@ -1,4 +1,4 @@
-
+Keep the responses short and consise, yet complete
 
 # **Architecture**
 

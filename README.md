@@ -118,12 +118,49 @@ docs/
      ```kotlin
      const val BASE_URL = "https://your-backend.com/api/"
      ```
+   - For Tailscale deployment (recommended):
+     ```kotlin
+     const val BASE_URL = "http://raspberrypi.mullet-bull.ts.net/weedx-backend/"
+     ```
+   - See [DEPLOYMENT_QUICK_START.md](DEPLOYMENT_QUICK_START.md) for deployment guide
 
 4. **Build & Run**
    ```bash
    ./gradlew assembleDebug
    ```
    Or open in Android Studio and click ▶️ Run
+
+5. **Deploy Backend to Raspberry Pi** (Optional)
+   
+   If you want to run the backend on Raspberry Pi 24/7 via Tailscale:
+   ```bash
+   # Interactive setup wizard (recommended)
+   ./scripts/setup-wizard.sh
+   
+   # Or manual deployment
+   ./scripts/deploy-to-pi.sh
+   ```
+   
+   See [DEPLOYMENT_QUICK_START.md](DEPLOYMENT_QUICK_START.md) for details.
+
+---
+
+## 🌐 Tailscale Deployment ✅ OPERATIONAL
+
+The backend is running on Raspberry Pi and accessible via Tailscale network:
+
+- **Pi URL**: `http://raspberrypi.mullet-bull.ts.net/weedx-backend/` ✅ **LIVE**
+- **Status**: All 30+ API endpoints working
+- **Location**: `/var/www/html/weedx-backend/`
+- **Database**: MySQL with 12 tables and sample data
+- **Quick Setup**: Run `./scripts/setup-wizard.sh` (if redeploying)
+- **Full Guide**: [docs/TAILSCALE_DEPLOYMENT.md](docs/TAILSCALE_DEPLOYMENT.md)
+
+Benefits:
+- ✅ Access backend from anywhere (no port forwarding)
+- ✅ Secure encrypted connection
+- ✅ Works on mobile/cellular networks
+- ✅ 24/7 availability on Raspberry Pi
 
 ---
 

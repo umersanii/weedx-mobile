@@ -1,10 +1,10 @@
 package com.example.weedx.utils
 
 object Constants {
-    // PHP Backend URL - update with your local IP or production server
-    // Local: http://192.168.1.8/weedx-backend/
-    // For emulator: http://10.0.2.2/weedx-backend/
-    const val BASE_URL = "http://192.168.1.8/weedx-backend/"
+    // PHP Backend URL - Tailscale network
+    // Raspberry Pi: http://raspberrypi.mullet-bull.ts.net/weedx-backend/
+    // Local fallback: http://192.168.1.8/weedx-backend/
+    const val BASE_URL = "http://raspberrypi.mullet-bull.ts.net/weedx-backend/"
     
     // SharedPreferences
     const val PREFS_NAME = "weedx_prefs"

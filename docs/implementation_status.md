@@ -20,14 +20,20 @@
 
 ## ✅ Completed (Backend - Nov 21, 2025)
 
-### Infrastructure
-- [x] Arch Linux LAMP stack configured
-  - Apache httpd 2.4.65 with mod_rewrite
+### Infrastructure ✅ DEPLOYED & OPERATIONAL
+- [x] Backend deployed on Raspberry Pi (Debian)
+  - Apache 2.4.65 with mod_rewrite enabled
   - MariaDB with dedicated user `weedx_user`
-  - PHP 8.4.15 with PDO MySQL extensions
-- [x] Deployment scripts created (`deploy-backend.sh`, `test-backend.sh`)
+  - PHP with PDO MySQL extensions
+  - Location: `/var/www/html/weedx-backend/`
+- [x] Deployment scripts created and tested
+  - `deploy-to-pi.sh` - Deploy via Tailscale
+  - `test-backend.sh` - Test all endpoints
+  - `setup-wizard.sh` - Interactive deployment
 - [x] CORS headers configured
-- [x] URL rewriting with `.htaccess`
+- [x] URL rewriting with `.htaccess` (fixed for all directory depths)
+- [x] **Backend URL**: `http://raspberrypi.mullet-bull.ts.net/weedx-backend/`
+- [x] **All 30+ endpoints tested and working**
 
 ### Database
 - [x] Database schema designed (12 tables)
