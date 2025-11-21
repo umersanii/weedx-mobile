@@ -1,17 +1,38 @@
 package com.example.weedx
 
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.weedx.presentation.viewmodels.MonitoringViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
+@AndroidEntryPoint
 class LiveMonitoringActivity : AppCompatActivity() {
 
+    private val viewModel: MonitoringViewModel by viewModels()
+    
     private lateinit var timelineRecyclerView: RecyclerView
     private lateinit var timelineAdapter: TimelineAdapter
+    private lateinit var batteryValue: TextView
+    private lateinit var herbicideValue: TextView
+    private lateinit var coverageValue: TextView
+    private lateinit var efficiencyValue: TextView
+    private lateinit var swipeRefresh: SwipeRefreshLayout
     private val timelineEvents = mutableListOf<TimelineEvent>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,8 +52,13 @@ class LiveMonitoringActivity : AppCompatActivity() {
 
         // Initialize views
         timelineRecyclerView = findViewById(R.id.timelineRecyclerView)
+        batteryValue = findViewById(R.id.batteryValue)
+        herbicideValue = findViewById(R.id.herbicideValue)
+        coverageValue = findViewById(R.id.coverageValue)
+        efficiencyValue = findViewById(R.id.efficiencyValue)
 
         setupTimeline()
+        observeViewModel()
     }
 
     private fun setupTimeline() {
@@ -66,6 +92,71 @@ class LiveMonitoringActivity : AppCompatActivity() {
         timelineRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@LiveMonitoringActivity)
             adapter = timelineAdapter
+        }
+    }
+    
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            viewModel.monitoringState.collect { state ->
+                when (state) {
+                    is MonitoringViewModel.MonitoringState.Idle -> {
+                        // Initial state
+                    }
+                    is MonitoringViewModel.MonitoringState.Loading -> {
+                        // Show loading state
+                    }
+                    is MonitoringViewModel.MonitoringState.Success -> {
+                        updateUI(state.data)
+                    }
+                    is MonitoringViewModel.MonitoringState.Error -> {
+                        Toast.makeText(
+                            this@LiveMonitoringActivity,
+                            "Error: ${state.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+    
+    private fun updateUI(data: com.example.weedx.data.models.response.MonitoringResponse) {
+        // Update metrics
+        batteryValue.text = "${data.metrics.battery}%"
+        herbicideValue.text = String.format("%.1fL", data.metrics.herbicideLevel)
+        coverageValue.text = String.format("%.1fha", data.metrics.areaCovered)
+        efficiencyValue.text = String.format("%.0f%%", data.metrics.efficiency)
+        
+        // Update timeline with real data
+        timelineEvents.clear()
+        data.activityTimeline.forEachIndexed { index, activity ->
+            timelineEvents.add(
+                TimelineEvent(
+                    title = activity.action,
+                    description = activity.details ?: "",
+                    timeAgo = formatTimeAgo(activity.timestamp),
+                    isLast = index == data.activityTimeline.size - 1
+                )
+            )
+        }
+        timelineAdapter.notifyDataSetChanged()
+    }
+    
+    private fun formatTimeAgo(timestamp: String): String {
+        return try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val date = dateFormat.parse(timestamp) ?: return timestamp
+            val now = Date()
+            val diff = now.time - date.time
+            
+            when {
+                diff < TimeUnit.MINUTES.toMillis(1) -> "Just now"
+                diff < TimeUnit.HOURS.toMillis(1) -> "${TimeUnit.MILLISECONDS.toMinutes(diff)} minutes ago"
+                diff < TimeUnit.DAYS.toMillis(1) -> "${TimeUnit.MILLISECONDS.toHours(diff)} hours ago"
+                else -> "${TimeUnit.MILLISECONDS.toDays(diff)} days ago"
+            }
+        } catch (e: Exception) {
+            timestamp
         }
     }
 }
