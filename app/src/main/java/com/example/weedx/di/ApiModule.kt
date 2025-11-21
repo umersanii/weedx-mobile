@@ -1,6 +1,6 @@
 package com.example.weedx.di
 
-import com.example.weedx.data.api.AuthApiService
+import com.example.weedx.data.api.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,7 +10,6 @@ import javax.inject.Singleton
 
 /**
  * Hilt module for providing API service instances
- * Currently only Auth is implemented
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -20,5 +19,53 @@ object ApiModule {
     @Singleton
     fun provideAuthApiService(retrofit: Retrofit): AuthApiService {
         return retrofit.create(AuthApiService::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideDashboardApiService(retrofit: Retrofit): DashboardApiService {
+        return retrofit.create(DashboardApiService::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideMonitoringApiService(retrofit: Retrofit): MonitoringApiService {
+        return retrofit.create(MonitoringApiService::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideWeedLogsApiService(retrofit: Retrofit): WeedLogsApiService {
+        return retrofit.create(WeedLogsApiService::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideEnvironmentApiService(retrofit: Retrofit): EnvironmentApiService {
+        return retrofit.create(EnvironmentApiService::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideReportsApiService(retrofit: Retrofit): ReportsApiService {
+        return retrofit.create(ReportsApiService::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideGalleryApiService(retrofit: Retrofit): GalleryApiService {
+        return retrofit.create(GalleryApiService::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideProfileApiService(retrofit: Retrofit): ProfileApiService {
+        return retrofit.create(ProfileApiService::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideAssistantApiService(retrofit: Retrofit): AssistantApiService {
+        return retrofit.create(AssistantApiService::class.java)
     }
 }
