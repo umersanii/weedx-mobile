@@ -209,15 +209,21 @@ See [gradle/libs.versions.toml](gradle/libs.versions.toml) for full list.
 
 ## 🛣️ Roadmap
 
-- [x] Auth flow (Firebase + Backend)
-- [x] Dashboard screen
-- [ ] Complete all API integrations
-- [ ] Activity ↔ ViewModel integration
-- [ ] Jetpack Compose migration
-- [ ] Offline caching with Room
-- [ ] Real-time updates via WebSockets
-- [ ] Multi-farm support
-- [ ] Advanced analytics
+- [x] ✅ Backend deployed on Raspberry Pi (via Tailscale)
+- [x] ✅ All 50+ backend API endpoints implemented & tested
+- [x] ✅ Android project setup with Hilt DI
+- [x] ✅ Auth flow (Firebase + Backend JWT)
+- [x] ✅ All 13 Activity screens created
+- [x] ✅ Complete data layer (9 API services + 9 repositories)
+- [x] ✅ All response models and request DTOs
+- [ ] 🔄 Build ViewModels for all modules
+- [ ] 🔄 Activity ↔ ViewModel integration
+- [ ] ⏳ End-to-end testing with real backend
+- [ ] ⏳ Offline caching with Room
+- [ ] ⏳ Real-time updates via polling/WebSockets
+- [ ] ⏳ Jetpack Compose migration
+- [ ] ⏳ Multi-farm support
+- [ ] ⏳ Advanced analytics
 
 ---
 
