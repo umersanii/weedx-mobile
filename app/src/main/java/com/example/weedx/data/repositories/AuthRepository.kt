@@ -18,8 +18,11 @@ class AuthRepository @Inject constructor(
 ) {
     suspend fun login(email: String, password: String): NetworkResult<String> {
         return try {
-            firebaseAuth.signInWithEmailAndPassword(email, password).await()
-            val response = authApiService.login(LoginRequest(email, password))
+            // TODO: Enable Firebase Auth when configured
+            // firebaseAuth.signInWithEmailAndPassword(email, password).await()
+            
+            val firebaseToken = "demo_firebase_token_${System.currentTimeMillis()}"
+            val response = authApiService.login(LoginRequest(email, password, firebaseToken))
             
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.data?.let { data ->

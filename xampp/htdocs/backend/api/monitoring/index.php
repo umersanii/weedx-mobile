@@ -4,9 +4,9 @@
  * GET /api/monitoring
  */
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../utils/response.php';
-require_once __DIR__ . '/../utils/auth.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../utils/response.php';
+require_once __DIR__ . '/../../utils/auth.php';
 
 $tokenData = Auth::validateToken();
 $database = new Database();

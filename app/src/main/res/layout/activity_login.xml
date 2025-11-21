@@ -267,6 +267,16 @@
                     app:cornerRadius="12dp"
                     android:elevation="0dp" />
 
+                <!-- Progress Bar -->
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_gravity="center_horizontal"
+                    android:indeterminateTint="@color/green_primary"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>

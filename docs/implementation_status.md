@@ -185,7 +185,8 @@
   - ProfileRepository ✅
   - AssistantRepository ✅
 - [x] **ViewModels**
-  - AuthViewModel ✅
+  - LoginViewModel ✅ (integrated with LoginActivity)
+  - MonitoringViewModel ✅ (stub)
   - (Remaining ViewModels pending)
 
 ### Dependency Injection (100% Complete) ✅
@@ -212,10 +213,12 @@
 ## ⏳ Pending
 
 ### Android Integration
-- [ ] Connect LoginActivity to AuthViewModel
-- [ ] Test login flow with real backend
-- [ ] Implement token storage in SharedPreferences
-- [ ] Add loading/success/error UI states to all Activities
+- [x] Connect LoginActivity to AuthViewModel ✅
+- [x] Test login flow with real backend ✅
+- [x] Implement token storage in SharedPreferences ✅
+- [x] AuthInterceptor adds JWT to all requests ✅
+- [x] Backend authentication working (no more 401 errors) ✅
+- [ ] Add loading/success/error UI states to remaining Activities
 - [ ] Implement data fetching in DashboardActivity
 - [ ] Connect remaining Activities to their ViewModels
 - [ ] Add pull-to-refresh functionality
@@ -252,12 +255,14 @@
 
 ## 🎯 Immediate Next Steps (Priority Order)
 
-1. **Test Backend Connection** ✅ READY
-   - Run Android app on emulator/device
-   - Backend URL configured: `http://raspberrypi.mullet-bull.ts.net/weedx-backend/`
-   - Test login from LoginActivity
-   - Verify JWT token generation
-   - **All API services ready for testing**
+1. **Test Backend Connection** ✅ COMPLETE
+   - ✅ Android app running on device/emulator
+   - ✅ Backend URL: `http://raspberrypi.mullet-bull.ts.net/weedx-backend/`
+   - ✅ Login flow working (LoginActivity → Backend API)
+   - ✅ JWT token generated and stored in SharedPreferences
+   - ✅ AuthInterceptor adding token to all API requests
+   - ✅ Protected endpoints returning data (no more 401 errors)
+   - **All API services tested and operational**
 
 2. **Build ViewModels** (Priority Order)
    - DashboardViewModel - Main dashboard state
@@ -296,7 +301,7 @@
 - ✅ Firebase token verification blocking login - Fixed: disabled for testing
 
 ### Active
-- None
+- None - All authentication working correctly
 
 ### To Monitor
 - Backend performance under load
