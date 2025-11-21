@@ -2,16 +2,40 @@
 
 # **Architecture**
 
-1. Kotlin Android app with backend in PHP + MySQL
-2. Firebase Auth for user authentication
-3. Firebase FCM for notifications only
-4. Robot sends data → MQTT → PHP subscriber → MySQL
-5. Android app reads data via REST API (no robot control)
-6. Modular code structure
-7. Follow best practices for readability and maintainability
-8. Keep all architecture, diagrams, and references inside the `.docs/` folder
-9. If unsure about any requirement, ask before implementing
-10. Responses must stay concise, direct, and complete
+- Kotlin Android app + PHP/MySQL backend
+- Firebase Auth + FCM only (no MQTT in app)
+- Robot → MQTT → PHP → MySQL → REST API → Android
+- App is read-only dashboard (no robot control)
+- MVVM + Repository pattern, Hilt DI
+- See `docs/` for details
+
+---
+
+# 📋 **Status**
+
+## ✅ Done
+- Dependencies: Retrofit, Hilt/KSP, Firebase, Coroutines, Room, Coil
+- Data layer: `data/api/`, `data/models/`, `data/repositories/`
+- DI modules: Network, App, API, Repository
+- Auth: API service, repository, ViewModel, interceptor
+- ViewBinding enabled
+- Docs: README, architecture, use cases, API endpoints
+
+## ⚠️ Pending
+- 7 API services: Dashboard, WeedLogs, Monitoring, Environment, Reports, Gallery, Assistant, Profile
+- 8 repositories (same list)
+- 8 ViewModels (same list)
+- Activity integration: `@AndroidEntryPoint`, inject ViewModels, collect StateFlow, add Loading/Success/Error UI
+- Config: Real `google-services.json` + `Constants.BASE_URL`
+
+---
+
+# 🎯 **Next**
+
+1. Build test with Auth-only backend
+2. Add modules one-by-one: Dashboard → WeedLogs → Monitoring → Weather → Reports → Gallery → Profile → Assistant
+3. Each module: API service → Repository → ViewModel → Activity
+4. Test Auth with LoginActivity first
 
 ---
 
