@@ -13,4 +13,6 @@
     <color name="gray_light">#F5F5F5</color>
     <color name="gray_border">#E0E0E0</color>
     <color name="background_light">#FAFAFA</color>
+    <color name="bottom_nav_color">#006400</color>
+    <color name="tab_selected_green">#006400</color>
 </resources>
