@@ -16,16 +16,26 @@ $db = $database->getConnection();
 try {
     $limit = $_GET['limit'] ?? 50;
     $offset = $_GET['offset'] ?? 0;
+    $userId = $tokenData['user_id'] ?? null;
     
     $query = "
-        SELECT id, image_path, weed_type, confidence, latitude, longitude, detected_at 
+        SELECT id, weed_type, confidence, latitude, longitude, 
+               image_base64, image_mime_type, detected_at 
         FROM weed_detections 
-        WHERE image_path IS NOT NULL
-        ORDER BY detected_at DESC 
-        LIMIT :limit OFFSET :offset
+        WHERE image_base64 IS NOT NULL
     ";
     
+    // Filter by user if user_id is provided
+    if ($userId) {
+        $query .= " AND (user_id = :user_id OR user_id IS NULL)";
+    }
+    
+    $query .= " ORDER BY detected_at DESC LIMIT :limit OFFSET :offset";
+    
     $stmt = $db->prepare($query);
+    if ($userId) {
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    }
     $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
@@ -37,8 +47,13 @@ try {
         $fullUrl = ImageHelper::getFullUrl($image['image_path']);
         return [
             'id' => (int)$image['id'],
+<<<<<<< HEAD
             'url' => $fullUrl,
             'thumbnail_url' => $fullUrl, // TODO: Generate thumbnails
+=======
+            'image_base64' => $image['image_base64'],
+            'image_mime_type' => $image['image_mime_type'],
+>>>>>>> e54912b (images endpoint)
             'weed_type' => $image['weed_type'],
             'confidence' => (float)$image['confidence'],
             'location' => [

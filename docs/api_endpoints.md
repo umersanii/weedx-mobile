@@ -76,10 +76,12 @@
 ## Image Gallery
 | Method | Endpoint        | Description                  |
 |--------|----------------|------------------------------|
-| GET    | /gallery       | List images                  |
+| GET    | /gallery       | List images (returns base64) |
 | POST   | /gallery       | Upload image                 |
-| GET    | /gallery/:id   | View single image            |
+| GET    | /gallery/:id   | View single image (base64)   |
 | DELETE | /gallery/:id   | Delete image                 |
+
+**Note:** Images are stored as base64 in the database and returned in API responses.
 
 ---
 

@@ -36,7 +36,12 @@ try {
     
     $response = [
         'id' => (int)$image['id'],
+<<<<<<< HEAD
         'url' => $fullUrl,
+=======
+        'image_base64' => $image['image_base64'],
+        'image_mime_type' => $image['image_mime_type'],
+>>>>>>> e54912b (images endpoint)
         'weed_type' => $image['weed_type'],
         'confidence' => (float)$image['confidence'],
         'location' => [

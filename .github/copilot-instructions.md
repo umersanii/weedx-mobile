@@ -1,4 +1,5 @@
 Keep the responses short and consise, yet complete
+Only the docs in the docs/ and xampp/htdocs/backend/ directories are to be maintained
 
 # **Architecture**
 

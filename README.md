@@ -210,7 +210,8 @@ See [gradle/libs.versions.toml](gradle/libs.versions.toml) for full list.
 ## 🛣️ Roadmap
 
 - [x] ✅ Backend deployed on Raspberry Pi (via Tailscale)
-- [x] ✅ All 50+ backend API endpoints implemented & tested
+- [x] ✅ All 51+ backend API endpoints implemented & tested
+- [x] ✅ Images endpoint configured to serve static files
 - [x] ✅ Android project setup with Hilt DI
 - [x] ✅ Auth flow (Firebase + Backend JWT)
 - [x] ✅ All 13 Activity screens created
