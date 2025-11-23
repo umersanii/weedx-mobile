@@ -145,8 +145,10 @@ See [API Documentation](../docs/api_endpoints.md) for complete list.
 - `GET /monitoring` - Live monitoring
 - `GET /environment` - Weather & soil
 - `GET /reports` - Analytics reports
-- `GET /gallery` - Image gallery
+- `GET /gallery` - Image gallery (base64 encoded)
 - `GET /profile` - User profile
+
+**Image Storage:** Images are stored as base64-encoded strings in the database. See [BASE64_IMAGES.md](BASE64_IMAGES.md) for details.
 
 ## 🤖 MQTT Integration (Optional)
 
@@ -253,6 +255,8 @@ backend/
 ├── config/                # Configuration files
 │   ├── database.php       # MySQL connection
 │   └── firebase.php       # Firebase config
+├── data/                  # Static data files
+│   └── images/            # Static images served via API
 ├── database/              # Database files
 │   └── schema.sql         # Database schema
 ├── mqtt/                  # MQTT subscriber

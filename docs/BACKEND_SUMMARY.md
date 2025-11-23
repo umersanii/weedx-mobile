@@ -18,7 +18,7 @@ A complete PHP REST API backend for the WeedX precision farming system with:
 - **Response Helper**: Standardized JSON responses
 - **CORS Support**: Cross-origin requests enabled
 
-### ✅ API Endpoints (50+ endpoints)
+### ✅ API Endpoints (51+ endpoints)
 
 #### Authentication (3 endpoints)
 - `POST /auth/login` - User login with Firebase token
@@ -56,11 +56,12 @@ A complete PHP REST API backend for the WeedX precision farming system with:
 - `GET /reports/weed-distribution` - Distribution by crop type
 - `GET /reports/export` - Export reports (PDF/CSV)
 
-#### Gallery (4 endpoints)
+#### Gallery (5 endpoints)
 - `GET /gallery` - List all weed images
 - `POST /gallery` - Upload new image
 - `GET /gallery/:id` - View single image
 - `DELETE /gallery/:id` - Delete image
+- `GET /images/:filename` - Serve image files from data/images folder
 
 #### Profile (8 endpoints)
 - `GET /profile` - Get complete user profile

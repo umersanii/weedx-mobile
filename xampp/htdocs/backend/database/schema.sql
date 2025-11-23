@@ -118,14 +118,18 @@ CREATE TABLE robot_activity_log (
 
 CREATE TABLE weed_detections (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NULL COMMENT 'User who owns this detection',
     weed_type VARCHAR(100) NOT NULL,
     crop_type VARCHAR(100) NULL,
     confidence DECIMAL(5, 2) DEFAULT 0 COMMENT 'Detection confidence 0-100',
     latitude DECIMAL(10, 8) NOT NULL,
     longitude DECIMAL(11, 8) NOT NULL,
-    image_path VARCHAR(500) NULL,
+    image_base64 LONGTEXT NULL COMMENT 'Base64 encoded image data',
+    image_mime_type VARCHAR(50) NULL COMMENT 'Image MIME type (image/jpeg, image/png, etc)',
     treated BOOLEAN DEFAULT FALSE,
     detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_user_id (user_id),
     INDEX idx_weed_type (weed_type),
     INDEX idx_crop_type (crop_type),
     INDEX idx_detected_at (detected_at),
@@ -201,6 +205,27 @@ CREATE TABLE alerts (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
+-- USER IMAGES (Gallery)
+-- =====================================================
+
+CREATE TABLE user_images (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    title VARCHAR(255) NULL,
+    description TEXT NULL,
+    image_base64 LONGTEXT NOT NULL COMMENT 'Base64 encoded image data',
+    image_mime_type VARCHAR(50) NOT NULL COMMENT 'Image MIME type (image/jpeg, image/png, etc)',
+    category VARCHAR(50) NULL COMMENT 'Image category (avatar, gallery, weed, etc)',
+    metadata TEXT NULL COMMENT 'JSON metadata',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_category (category),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
 -- CHAT HISTORY (Assistant)
 -- =====================================================
 
@@ -252,6 +277,7 @@ INSERT INTO weather_forecast (forecast_date, temp_high, temp_low, weather_condit
 INSERT INTO soil_data (moisture, temperature, ph, nitrogen, phosphorus, potassium, organic_matter) VALUES
 (45.0, 22.0, 6.5, 50, 30, 40, 3.5);
 
+<<<<<<< HEAD
 -- Sample weed detections with base64 encoded images (1x1 pixel placeholders for demo)
 INSERT INTO weed_detections (weed_type, crop_type, confidence, latitude, longitude, image_path, detected_at) VALUES
 ('Broadleaf Weed', 'Wheat', 92.5, 31.5204, 74.3587, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', NOW()),
@@ -260,6 +286,14 @@ INSERT INTO weed_detections (weed_type, crop_type, confidence, latitude, longitu
 ('Sedge', 'Wheat', 79.8, 31.5215, 74.3595, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg==', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
 ('Broadleaf Weed', 'Wheat', 91.2, 31.5200, 74.3585, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
 ('Grass Weed', 'Corn', 87.6, 31.5208, 74.3592, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwIAMCbHYQAAAABJRU5ErkJggg==', DATE_SUB(NOW(), INTERVAL 7 HOUR));
+=======
+-- Sample weed detections (no images initially - use upload script to add)
+INSERT INTO weed_detections (user_id, weed_type, crop_type, confidence, latitude, longitude, image_base64, image_mime_type, detected_at) VALUES
+(1, 'Broadleaf Weed', 'Wheat', 92.5, 31.5204, 74.3587, NULL, NULL, NOW()),
+(1, 'Grass Weed', 'Wheat', 88.3, 31.5210, 74.3590, NULL, NULL, DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+(1, 'Broadleaf Weed', 'Corn', 95.1, 31.5198, 74.3580, NULL, NULL, DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+(1, 'Sedge', 'Wheat', 79.8, 31.5215, 74.3595, NULL, NULL, DATE_SUB(NOW(), INTERVAL 3 HOUR));
+>>>>>>> e54912b (images endpoint)
 
 -- Sample robot activity
 INSERT INTO robot_activity_log (action, description, status) VALUES
