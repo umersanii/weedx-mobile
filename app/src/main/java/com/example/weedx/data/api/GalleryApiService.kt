@@ -10,7 +10,7 @@ import retrofit2.http.*
 interface GalleryApiService {
     @GET("gallery")
     suspend fun getGalleryImages(
-        @Query("page") page: Int? = null,
+        @Query("offset") offset: Int? = null,
         @Query("limit") limit: Int? = null
     ): Response<ApiResponse<List<GalleryImage>>>
     

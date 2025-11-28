@@ -252,12 +252,14 @@ INSERT INTO weather_forecast (forecast_date, temp_high, temp_low, weather_condit
 INSERT INTO soil_data (moisture, temperature, ph, nitrogen, phosphorus, potassium, organic_matter) VALUES
 (45.0, 22.0, 6.5, 50, 30, 40, 3.5);
 
--- Sample weed detections
-INSERT INTO weed_detections (weed_type, crop_type, confidence, latitude, longitude, detected_at) VALUES
-('Broadleaf Weed', 'Wheat', 92.5, 31.5204, 74.3587, NOW()),
-('Grass Weed', 'Wheat', 88.3, 31.5210, 74.3590, DATE_SUB(NOW(), INTERVAL 1 HOUR)),
-('Broadleaf Weed', 'Corn', 95.1, 31.5198, 74.3580, DATE_SUB(NOW(), INTERVAL 2 HOUR)),
-('Sedge', 'Wheat', 79.8, 31.5215, 74.3595, DATE_SUB(NOW(), INTERVAL 3 HOUR));
+-- Sample weed detections with base64 encoded images (1x1 pixel placeholders for demo)
+INSERT INTO weed_detections (weed_type, crop_type, confidence, latitude, longitude, image_path, detected_at) VALUES
+('Broadleaf Weed', 'Wheat', 92.5, 31.5204, 74.3587, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', NOW()),
+('Grass Weed', 'Wheat', 88.3, 31.5210, 74.3590, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+('Broadleaf Weed', 'Corn', 95.1, 31.5198, 74.3580, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8CwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+('Sedge', 'Wheat', 79.8, 31.5215, 74.3595, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg==', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
+('Broadleaf Weed', 'Wheat', 91.2, 31.5200, 74.3585, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==', DATE_SUB(NOW(), INTERVAL 5 HOUR)),
+('Grass Weed', 'Corn', 87.6, 31.5208, 74.3592, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwIAMCbHYQAAAABJRU5ErkJggg==', DATE_SUB(NOW(), INTERVAL 7 HOUR));
 
 -- Sample robot activity
 INSERT INTO robot_activity_log (action, description, status) VALUES
