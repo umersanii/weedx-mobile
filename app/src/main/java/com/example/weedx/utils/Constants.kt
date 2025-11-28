@@ -6,6 +6,23 @@ object Constants {
     // Local fallback: http://192.168.1.8/weedx-backend/
     const val BASE_URL = "http://raspberrypi.mullet-bull.ts.net/weedx-backend/"
     
+    // Image base URL (without /api suffix for serving static files)
+    const val IMAGE_BASE_URL = "http://raspberrypi.mullet-bull.ts.net/weedx-backend"
+    
+    /**
+     * Constructs a full image URL from a path.
+     * If the path is already a full URL, returns it as-is.
+     * If it's a relative path, prepends the IMAGE_BASE_URL.
+     */
+    fun getFullImageUrl(path: String?): String? {
+        if (path.isNullOrBlank()) return null
+        return when {
+            path.startsWith("http://") || path.startsWith("https://") -> path
+            path.startsWith("/") -> IMAGE_BASE_URL + path
+            else -> "$IMAGE_BASE_URL/$path"
+        }
+    }
+    
     // SharedPreferences
     const val PREFS_NAME = "weedx_prefs"
     const val KEY_AUTH_TOKEN = "auth_token"

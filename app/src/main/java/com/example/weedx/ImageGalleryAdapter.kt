@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.RoundedCornersTransformation
 import com.example.weedx.data.models.response.GalleryImage
+import com.example.weedx.utils.Constants
 
 class ImageGalleryAdapter(
     private val onImageClick: ((GalleryImage) -> Unit)? = null
@@ -34,15 +35,18 @@ class ImageGalleryAdapter(
         // Display weed type as label
         holder.zoneLabel.text = image.weedType
         
+        // Construct full URL (handles both relative and absolute paths)
+        val imageUrl = Constants.getFullImageUrl(image.url)
+        
         // Load image using Coil
-        if (image.url.isNotEmpty()) {
+        if (!imageUrl.isNullOrEmpty()) {
             holder.placeholderIcon.visibility = View.GONE
             holder.galleryImage.visibility = View.VISIBLE
             
-            holder.galleryImage.load(image.url) {
+            holder.galleryImage.load(imageUrl) {
                 crossfade(true)
-                placeholder(R.drawable.ic_info) // Use as placeholder
-                error(R.drawable.ic_info) // Use as error placeholder
+                placeholder(R.drawable.ic_info)
+                error(R.drawable.ic_info)
                 transformations(RoundedCornersTransformation(16f))
             }
         } else {
