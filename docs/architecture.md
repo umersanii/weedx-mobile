@@ -63,6 +63,7 @@ WeedX is a **read-only dashboard** for monitoring a precision farming robot. The
 
 ### 4. **Android App**
 - **Firebase Auth**: User login/signup
+- **Multi-step Registration**: User info, Farm info, App settings
 - **Retrofit**: Fetches data from REST API
 - **FCM**: Receives push notifications
 - **UI**: Displays dashboards, logs, reports

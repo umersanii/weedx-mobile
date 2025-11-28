@@ -2,22 +2,47 @@ package com.example.weedx
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.weedx.data.models.response.FarmInfo
+import com.example.weedx.data.models.response.ProfileResponse
+import com.example.weedx.data.models.response.UserProfile
+import com.example.weedx.presentation.viewmodels.ProfileViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 
+@AndroidEntryPoint
 class ProfileActivity : AppCompatActivity() {
+
+    private val viewModel: ProfileViewModel by viewModels()
 
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var notificationsItem: LinearLayout
     private lateinit var appSettingsItem: LinearLayout
     private lateinit var helpSupportItem: LinearLayout
     private lateinit var logoutButton: CardView
+    
+    // Profile views
+    private lateinit var userName: TextView
+    private lateinit var userEmail: TextView
+    private lateinit var memberSince: TextView
+    private lateinit var farmName: TextView
+    private lateinit var totalArea: TextView
+    private lateinit var robotId: TextView
+    private var loadingIndicator: ProgressBar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +62,10 @@ class ProfileActivity : AppCompatActivity() {
         initViews()
         setupClickListeners()
         setupBottomNavigation()
+        observeProfileState()
+        
+        // Load profile data from API
+        viewModel.loadProfile()
     }
 
     private fun initViews() {
@@ -45,6 +74,89 @@ class ProfileActivity : AppCompatActivity() {
         appSettingsItem = findViewById(R.id.appSettingsItem)
         helpSupportItem = findViewById(R.id.helpSupportItem)
         logoutButton = findViewById(R.id.logoutButton)
+        
+        // Profile data views
+        userName = findViewById(R.id.userName)
+        userEmail = findViewById(R.id.userEmail)
+        memberSince = findViewById(R.id.memberSince)
+        farmName = findViewById(R.id.farmName)
+        totalArea = findViewById(R.id.totalArea)
+        robotId = findViewById(R.id.robotId)
+        loadingIndicator = findViewById(R.id.loadingIndicator)
+    }
+    
+    private fun observeProfileState() {
+        lifecycleScope.launch {
+            viewModel.profileState.collect { state ->
+                when (state) {
+                    is ProfileViewModel.ProfileState.Idle -> {
+                        // Initial state - show default data
+                        showDefaultData()
+                    }
+                    is ProfileViewModel.ProfileState.Loading -> {
+                        showLoading(true)
+                    }
+                    is ProfileViewModel.ProfileState.Success -> {
+                        showLoading(false)
+                        updateUI(state.data)
+                    }
+                    is ProfileViewModel.ProfileState.Error -> {
+                        showLoading(false)
+                        // Show default data on error
+                        showDefaultData()
+                        Toast.makeText(this@ProfileActivity, "Using offline data", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+    
+    private fun showLoading(isLoading: Boolean) {
+        loadingIndicator?.visibility = if (isLoading) View.VISIBLE else View.GONE
+    }
+    
+    private fun updateUI(profile: ProfileResponse) {
+        // Update user info
+        updateUserInfo(profile.user)
+        
+        // Update farm info
+        profile.farm?.let { updateFarmInfo(it) } ?: updateFarmInfo(ProfileViewModel.DEFAULT_FARM)
+    }
+    
+    private fun updateUserInfo(user: UserProfile) {
+        userName.text = user.name
+        userEmail.text = user.email
+        memberSince.text = formatMemberSince(user.createdAt)
+    }
+    
+    private fun updateFarmInfo(farm: FarmInfo) {
+        farmName.text = farm.name
+        totalArea.text = "${farm.area?.toInt() ?: 0} hectares"
+        // Robot ID is not part of farm info, keep default or load separately
+    }
+    
+    private fun showDefaultData() {
+        updateUserInfo(ProfileViewModel.DEFAULT_USER)
+        updateFarmInfo(ProfileViewModel.DEFAULT_FARM)
+        robotId.text = "WX-2024-001"
+    }
+    
+    private fun formatMemberSince(dateStr: String): String {
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("MMM yyyy", Locale.getDefault())
+            val date = inputFormat.parse(dateStr)
+            "Member since ${outputFormat.format(date!!)}"
+        } catch (e: Exception) {
+            try {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val outputFormat = SimpleDateFormat("MMM yyyy", Locale.getDefault())
+                val date = inputFormat.parse(dateStr)
+                "Member since ${outputFormat.format(date!!)}"
+            } catch (e2: Exception) {
+                "Member since Jan 2024"
+            }
+        }
     }
 
     private fun setupClickListeners() {

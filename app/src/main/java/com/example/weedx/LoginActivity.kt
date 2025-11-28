@@ -131,8 +131,9 @@ class LoginActivity : AppCompatActivity() {
         loginTab.setBackgroundColor(getColor(R.color.gray_light))
         loginTab.setTextColor(getColor(R.color.gray_text))
         
-        // TODO: Navigate to sign up screen or show sign up form
-        Toast.makeText(this, "Sign Up feature coming soon", Toast.LENGTH_SHORT).show()
+        // Navigate to sign up screen
+        val intent = Intent(this, SignUpActivity::class.java)
+        startActivity(intent)
     }
 
     private fun performLogin() {

@@ -3,8 +3,10 @@ package com.example.weedx.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weedx.data.models.response.Alert
+import com.example.weedx.data.models.response.CurrentWeather
 import com.example.weedx.data.models.response.DashboardResponse
 import com.example.weedx.data.repositories.DashboardRepository
+import com.example.weedx.data.repositories.EnvironmentRepository
 import com.example.weedx.utils.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val dashboardRepository: DashboardRepository
+    private val dashboardRepository: DashboardRepository,
+    private val environmentRepository: EnvironmentRepository
 ) : ViewModel() {
     
     private val _dashboardState = MutableStateFlow<DashboardState>(DashboardState.Idle)
@@ -22,6 +25,9 @@ class DashboardViewModel @Inject constructor(
     
     private val _alertsState = MutableStateFlow<AlertsState>(AlertsState.Idle)
     val alertsState: StateFlow<AlertsState> = _alertsState
+    
+    private val _weatherState = MutableStateFlow<WeatherState>(WeatherState.Idle)
+    val weatherState: StateFlow<WeatherState> = _weatherState
     
     init {
         // Don't auto-load on init to prevent crashes during activity creation
@@ -72,9 +78,32 @@ class DashboardViewModel @Inject constructor(
         }
     }
     
+    fun loadWeather() {
+        viewModelScope.launch {
+            try {
+                _weatherState.value = WeatherState.Loading
+                
+                when (val result = environmentRepository.getCurrentWeather()) {
+                    is NetworkResult.Success -> {
+                        _weatherState.value = WeatherState.Success(result.data)
+                    }
+                    is NetworkResult.Error -> {
+                        _weatherState.value = WeatherState.Error(result.message)
+                    }
+                    is NetworkResult.Loading -> {
+                        _weatherState.value = WeatherState.Loading
+                    }
+                }
+            } catch (e: Exception) {
+                _weatherState.value = WeatherState.Error(e.localizedMessage ?: "Unknown error")
+            }
+        }
+    }
+    
     fun refresh() {
         loadDashboardData()
         loadAlerts()
+        loadWeather()
     }
     
     sealed class DashboardState {
@@ -89,5 +118,12 @@ class DashboardViewModel @Inject constructor(
         object Loading : AlertsState()
         data class Success(val alerts: List<Alert>) : AlertsState()
         data class Error(val message: String) : AlertsState()
+    }
+    
+    sealed class WeatherState {
+        object Idle : WeatherState()
+        object Loading : WeatherState()
+        data class Success(val weather: CurrentWeather) : WeatherState()
+        data class Error(val message: String) : WeatherState()
     }
 }

@@ -2,6 +2,8 @@
 /**
  * Gallery List Endpoint
  * GET /api/gallery
+ * 
+ * Returns gallery images with full URLs for file-based storage
  */
 
 require_once __DIR__ . '/../../config/database.php';
@@ -19,8 +21,8 @@ $db = $database->getConnection();
 try {
     $limit = $_GET['limit'] ?? 50;
     $offset = $_GET['offset'] ?? 0;
-    $userId = $tokenData['user_id'] ?? null;
     
+    // Get images that have a file path stored
     // Get all detections (with or without images)
     $query = "
         SELECT id, weed_type, confidence, latitude, longitude, 
@@ -37,9 +39,6 @@ try {
     $query .= " ORDER BY detected_at DESC LIMIT :limit OFFSET :offset";
     
     $stmt = $db->prepare($query);
-    if ($userId) {
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-    }
     $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
@@ -91,6 +90,7 @@ try {
             'image_url' => $imageUrl, // Keep for backward compatibility
             'has_image' => $imageUrl !== null,
             'weed_type' => $image['weed_type'],
+            'crop_type' => $image['crop_type'],
             'confidence' => (float)$image['confidence'],
             'location' => [
                 'latitude' => (float)$image['latitude'],

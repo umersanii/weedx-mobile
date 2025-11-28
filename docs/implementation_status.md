@@ -54,8 +54,8 @@
 
 ### API Endpoints (50+ endpoints)
 - [x] **Auth Module** (3 endpoints)
-  - POST `/auth/login` - User login with JWT
-  - POST `/auth/register` - New user registration
+  - POST `/auth/login` - User login with JWT ✅
+  - POST `/auth/register` - New user registration ✅ NEW (Nov 29)
   - POST `/auth/logout` - User logout
 - [x] **Dashboard Module** (3 endpoints)
   - GET `/dashboard/stats` - Dashboard statistics
@@ -143,6 +143,7 @@
 ### UI/Activities (100% Complete)
 - [x] SplashActivity - App launch screen
 - [x] LoginActivity - User authentication UI
+- [x] SignUpActivity - Multi-step user registration ✅ NEW (Nov 29)
 - [x] DashboardActivity - Main dashboard
 - [x] WeedLogsActivity - Weed detection logs
 - [x] WeedLogDetailActivity - Detection details
@@ -190,6 +191,7 @@
   - AssistantRepository ✅
 - [x] **ViewModels**
   - LoginViewModel ✅ (integrated with LoginActivity)
+  - SignUpViewModel ✅ (integrated with SignUpActivity) NEW (Nov 29)
   - MonitoringViewModel ✅ (stub)
   - DashboardViewModel ✅
   - GalleryViewModel ✅
