@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/image_helper.php';
 
 $tokenData = Auth::validateToken();
 
@@ -15,40 +16,23 @@ if (!isset($_FILES['image'])) {
     Response::error('No image file provided', 400);
 }
 
-$file = $_FILES['image'];
+// Use ImageHelper to save the image to gallery category
+$result = ImageHelper::saveUploadedImage(
+    $_FILES['image'],
+    ImageHelper::CATEGORY_GALLERY,
+    null,
+    5 // Max 5MB
+);
 
-// Validate file type
-$allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-if (!in_array($file['type'], $allowedTypes)) {
-    Response::error('Invalid file type. Only JPEG and PNG allowed', 400);
-}
-
-// Validate file size (max 5MB)
-if ($file['size'] > 5 * 1024 * 1024) {
-    Response::error('File too large. Maximum 5MB', 400);
-}
-
-// Create uploads directory if not exists
-$uploadDir = __DIR__ . '/../../uploads/gallery/';
-if (!file_exists($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
-}
-
-// Generate unique filename
-$extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-$filename = uniqid('weed_', true) . '.' . $extension;
-$filepath = $uploadDir . $filename;
-
-// Move uploaded file
-if (!move_uploaded_file($file['tmp_name'], $filepath)) {
-    Response::error('Failed to upload file', 500);
+if (!$result['success']) {
+    Response::error($result['error'], 400);
 }
 
 // Save to database
 $database = new Database();
 $db = $database->getConnection();
 
-$imagePath = '/uploads/gallery/' . $filename;
+$imagePath = $result['relative_path'];
 $weedType = $_POST['weed_type'] ?? 'Unknown';
 $confidence = $_POST['confidence'] ?? 0;
 $latitude = $_POST['latitude'] ?? 0;
@@ -70,7 +54,7 @@ $stmt->bindParam(':image_path', $imagePath);
 if ($stmt->execute()) {
     Response::success([
         'id' => (int)$db->lastInsertId(),
-        'url' => $imagePath,
+        'url' => $result['full_url'],
         'uploaded_at' => date('Y-m-d H:i:s')
     ], 'Image uploaded successfully', 201);
 } else {

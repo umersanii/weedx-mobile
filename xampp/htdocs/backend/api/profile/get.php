@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/image_helper.php';
 
 $tokenData = Auth::validateToken();
 $database = new Database();
@@ -36,12 +37,15 @@ try {
     $settingsStmt->execute();
     $settings = $settingsStmt->fetch();
     
+    // Get full avatar URL if avatar exists
+    $avatarUrl = $user['avatar'] ? ImageHelper::getFullUrl($user['avatar']) : null;
+    
     $response = [
         'user' => [
             'id' => (int)$user['id'],
             'name' => $user['name'],
             'email' => $user['email'],
-            'avatar' => $user['avatar'],
+            'avatar' => $avatarUrl,
             'phone' => $user['phone'] ?? null,
             'joined' => $user['created_at']
         ],

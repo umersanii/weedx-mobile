@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/image_helper.php';
 
 $tokenData = Auth::validateToken();
 $database = new Database();
@@ -38,6 +39,8 @@ try {
     $detections = $stmt->fetchAll();
     
     $response = array_map(function($detection) {
+        // Convert relative path to full URL using ImageHelper
+        $imageUrl = $detection['image_path'] ? ImageHelper::getFullUrl($detection['image_path']) : null;
         return [
             'id' => (int)$detection['id'],
             'weed_type' => $detection['weed_type'],
@@ -46,7 +49,7 @@ try {
                 'latitude' => (float)$detection['latitude'],
                 'longitude' => (float)$detection['longitude']
             ],
-            'image_url' => $detection['image_path'] ?? null,
+            'image_url' => $imageUrl,
             'crop_type' => $detection['crop_type'] ?? null,
             'detected_at' => $detection['detected_at']
         ];

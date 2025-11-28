@@ -1,18 +1,32 @@
--- Update existing weed detections with base64 encoded placeholder images
--- These are 1x1 pixel PNG images in different colors for testing
+-- Update Gallery Images SQL Script
+-- This script clears base64 encoded images and sets proper file paths
+-- Run this after deploying the backend to fix image display issues
 
-UPDATE weed_detections SET image_path = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' WHERE id = 1;
-UPDATE weed_detections SET image_path = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' WHERE id = 2;
-UPDATE weed_detections SET image_path = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8CwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==' WHERE id = 3;
-UPDATE weed_detections SET image_path = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg==' WHERE id = 4;
+USE weedx;
 
--- Insert additional sample data if doesn't exist
-INSERT INTO weed_detections (weed_type, crop_type, confidence, latitude, longitude, image_path, detected_at)
-SELECT 'Broadleaf Weed', 'Wheat', 91.2, 31.5200, 74.3585, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==', DATE_SUB(NOW(), INTERVAL 5 HOUR)
-FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM weed_detections WHERE id = 5);
+-- Clear existing base64 encoded sample images
+-- The sample data in schema.sql uses base64 strings which won't display properly
+UPDATE weed_detections 
+SET image_path = NULL 
+WHERE image_path LIKE 'data:image%';
 
-INSERT INTO weed_detections (weed_type, crop_type, confidence, latitude, longitude, image_path, detected_at)
-SELECT 'Grass Weed', 'Corn', 87.6, 31.5208, 74.3592, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwIAMCbHYQAAAABJRU5ErkJggg==', DATE_SUB(NOW(), INTERVAL 7 HOUR)
-FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM weed_detections WHERE id = 6);
+-- Option 1: Set NULL for entries without actual images (cleaner approach)
+-- The app will show placeholder icons for missing images
+
+-- Option 2: Insert sample detections with placeholder paths
+-- Note: You'll need to place actual sample images in the uploads/gallery/ folder
+-- Or upload them via the API endpoints
+
+-- To add sample image files, either:
+-- 1. Upload images through the POST /gallery API endpoint
+-- 2. Manually copy image files to /uploads/gallery/ and run:
+/*
+UPDATE weed_detections SET image_path = '/uploads/gallery/sample_broadleaf_1.jpg' WHERE id = 1;
+UPDATE weed_detections SET image_path = '/uploads/gallery/sample_grass_1.jpg' WHERE id = 2;
+UPDATE weed_detections SET image_path = '/uploads/gallery/sample_broadleaf_2.jpg' WHERE id = 3;
+UPDATE weed_detections SET image_path = '/uploads/gallery/sample_sedge_1.jpg' WHERE id = 4;
+UPDATE weed_detections SET image_path = '/uploads/gallery/sample_broadleaf_3.jpg' WHERE id = 5;
+UPDATE weed_detections SET image_path = '/uploads/gallery/sample_grass_2.jpg' WHERE id = 6;
+*/
+
+COMMIT;

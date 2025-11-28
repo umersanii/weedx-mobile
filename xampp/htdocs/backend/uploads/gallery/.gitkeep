@@ -1,0 +1,3 @@
+# Gallery folder (Weed Detection Images)
+# Images captured during weed detection are stored here
+# Naming convention: weed_{unique_id}.{ext}

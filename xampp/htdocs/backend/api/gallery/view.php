@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/image_helper.php';
 
 $tokenData = Auth::validateToken();
 $database = new Database();
@@ -30,9 +31,12 @@ try {
         Response::error('Image not found', 404);
     }
     
+    // Convert relative path to full URL using ImageHelper
+    $fullUrl = ImageHelper::getFullUrl($image['image_path']);
+    
     $response = [
         'id' => (int)$image['id'],
-        'url' => $image['image_path'],
+        'url' => $fullUrl,
         'weed_type' => $image['weed_type'],
         'confidence' => (float)$image['confidence'],
         'location' => [
