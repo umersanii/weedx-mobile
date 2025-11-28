@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../utils/response.php';
 require_once __DIR__ . '/../utils/auth.php';
+require_once __DIR__ . '/../utils/logger.php';
+
+Logger::logRequest('/api/environment', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/environment', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -58,7 +62,9 @@ try {
         ]
     ];
     
+    Logger::logSuccess('/api/environment', 'Environment data fetched');
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/environment', $e->getMessage(), 500);
     Response::error('Failed to fetch environment data: ' . $e->getMessage(), 500);
 }

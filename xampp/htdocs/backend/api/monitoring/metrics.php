@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/monitoring/metrics', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/monitoring/metrics', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -23,7 +27,9 @@ try {
         'efficiency' => (float)($status['efficiency'] ?? 85.5)
     ];
     
+    Logger::logSuccess('/api/monitoring/metrics', 'Battery: ' . $response['battery'] . '%, Herbicide: ' . $response['herbicide_level'] . '%');
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/monitoring/metrics', $e->getMessage(), 500);
     Response::error('Failed to fetch metrics: ' . $e->getMessage(), 500);
 }

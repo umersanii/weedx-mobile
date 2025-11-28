@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../../config/database.php';
 require_once __DIR__ . '/../../../utils/response.php';
 require_once __DIR__ . '/../../../utils/auth.php';
+require_once __DIR__ . '/../../../utils/logger.php';
+
+Logger::logRequest('/api/profile/settings', 'PUT');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/profile/settings', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -68,8 +72,10 @@ try {
         }
         
         if ($stmt->execute()) {
+            Logger::logSuccess('/api/profile/settings', 'Settings updated for user ID: ' . $userId);
             Response::success(null, 'Settings updated successfully');
         } else {
+            Logger::logError('/api/profile/settings', 'Failed to update settings', 500);
             Response::error('Failed to update settings', 500);
         }
     } else {
@@ -86,11 +92,14 @@ try {
         $stmt->bindParam(':theme', $theme);
         
         if ($stmt->execute()) {
+            Logger::logSuccess('/api/profile/settings', 'Settings created for user ID: ' . $userId);
             Response::success(null, 'Settings created successfully', 201);
         } else {
+            Logger::logError('/api/profile/settings', 'Failed to create settings', 500);
             Response::error('Failed to create settings', 500);
         }
     }
 } catch (Exception $e) {
+    Logger::logError('/api/profile/settings', $e->getMessage(), 500);
     Response::error('Failed to update settings: ' . $e->getMessage(), 500);
 }

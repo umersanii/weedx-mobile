@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../../config/database.php';
 require_once __DIR__ . '/../../../utils/response.php';
 require_once __DIR__ . '/../../../utils/auth.php';
+require_once __DIR__ . '/../../../utils/logger.php';
+
+Logger::logRequest('/api/profile/farm', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/profile/farm', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -23,6 +27,7 @@ try {
     $farm = $stmt->fetch();
     
     if (!$farm) {
+        Logger::logError('/api/profile/farm', 'No farm information found', 404);
         Response::error('No farm information found', 404);
     }
     
@@ -35,7 +40,9 @@ try {
         'created_at' => $farm['created_at']
     ];
     
+    Logger::logSuccess('/api/profile/farm', 'Farm info fetched: ' . $farm['name']);
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/profile/farm', $e->getMessage(), 500);
     Response::error('Failed to fetch farm info: ' . $e->getMessage(), 500);
 }

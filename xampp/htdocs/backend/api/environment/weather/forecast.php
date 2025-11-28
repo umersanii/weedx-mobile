@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../../config/database.php';
 require_once __DIR__ . '/../../../utils/response.php';
 require_once __DIR__ . '/../../../utils/auth.php';
+require_once __DIR__ . '/../../../utils/logger.php';
+
+Logger::logRequest('/api/environment/weather/forecast', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/environment/weather/forecast', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -34,7 +38,9 @@ try {
         ];
     }, $forecast);
     
+    Logger::logSuccess('/api/environment/weather/forecast', 'Fetched ' . count($response) . ' days forecast');
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/environment/weather/forecast', $e->getMessage(), 500);
     Response::error('Failed to fetch forecast: ' . $e->getMessage(), 500);
 }

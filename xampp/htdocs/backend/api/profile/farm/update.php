@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../../config/database.php';
 require_once __DIR__ . '/../../../utils/response.php';
 require_once __DIR__ . '/../../../utils/auth.php';
+require_once __DIR__ . '/../../../utils/logger.php';
+
+Logger::logRequest('/api/profile/farm', 'PUT');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/profile/farm', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -69,8 +73,10 @@ try {
         }
         
         if ($stmt->execute()) {
+            Logger::logSuccess('/api/profile/farm', 'Farm info updated for user ID: ' . $userId);
             Response::success(null, 'Farm info updated successfully');
         } else {
+            Logger::logError('/api/profile/farm', 'Failed to update farm info', 500);
             Response::error('Failed to update farm info', 500);
         }
     } else {
@@ -88,11 +94,14 @@ try {
         $stmt->bindParam(':crop_types', $cropTypes);
         
         if ($stmt->execute()) {
+            Logger::logSuccess('/api/profile/farm', 'Farm created for user ID: ' . $userId);
             Response::success(['id' => (int)$db->lastInsertId()], 'Farm created successfully', 201);
         } else {
+            Logger::logError('/api/profile/farm', 'Failed to create farm', 500);
             Response::error('Failed to create farm', 500);
         }
     }
 } catch (Exception $e) {
+    Logger::logError('/api/profile/farm', $e->getMessage(), 500);
     Response::error('Failed to update farm: ' . $e->getMessage(), 500);
 }

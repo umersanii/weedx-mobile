@@ -1,6 +1,6 @@
 # WeedX Implementation Status
 
-**Last Updated**: November 21, 2025
+**Last Updated**: November 28, 2025
 
 ---
 
@@ -111,6 +111,10 @@
 - [x] Response formatter (`utils/response.php`)
 - [x] Database connection class (`config/database.php`)
 - [x] MQTT subscriber script (`mqtt/subscriber.php`)
+- [x] **Logger utility** (`utils/logger.php`) - API request/response logging
+  - Logs to `logs/api_YYYY-MM-DD.log`
+  - Also outputs to `error_log` for real-time terminal viewing
+  - Logs: request method, endpoint, auth status, success/error responses
 
 ### Documentation
 - [x] API endpoints documentation (`docs/api_endpoints.md`)

@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/profile', 'PUT');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/profile', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -54,10 +58,13 @@ try {
     }
     
     if ($stmt->execute()) {
+        Logger::logSuccess('/api/profile', 'Profile updated for user ID: ' . $userId);
         Response::success(null, 'Profile updated successfully');
     } else {
+        Logger::logError('/api/profile', 'Failed to update profile', 500);
         Response::error('Failed to update profile', 500);
     }
 } catch (Exception $e) {
+    Logger::logError('/api/profile', $e->getMessage(), 500);
     Response::error('Failed to update profile: ' . $e->getMessage(), 500);
 }

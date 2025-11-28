@@ -7,9 +7,13 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/robot/status', 'GET');
 
 // Validate token
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/robot/status', $tokenData['userId'] ?? null, true);
 
 // Connect to database
 $database = new Database();
@@ -42,8 +46,10 @@ try {
         'last_updated' => $status['updated_at']
     ];
     
+    Logger::logSuccess('/api/robot/status', 'Robot status: ' . $response['status']);
     Response::success($response);
     
 } catch (Exception $e) {
+    Logger::logError('/api/robot/status', $e->getMessage(), 500);
     Response::error('Failed to fetch robot status: ' . $e->getMessage(), 500);
 }

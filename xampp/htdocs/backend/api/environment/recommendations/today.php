@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../../config/database.php';
 require_once __DIR__ . '/../../../utils/response.php';
 require_once __DIR__ . '/../../../utils/auth.php';
+require_once __DIR__ . '/../../../utils/logger.php';
+
+Logger::logRequest('/api/environment/recommendations/today', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/environment/recommendations/today', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -73,7 +77,9 @@ try {
         $recommendations[] = 'Midday heat - avoid prolonged operations';
     }
     
+    Logger::logSuccess('/api/environment/recommendations/today', 'Generated ' . count($recommendations) . ' recommendations');
     Response::success($recommendations);
 } catch (Exception $e) {
+    Logger::logError('/api/environment/recommendations/today', $e->getMessage(), 500);
     Response::error('Failed to generate recommendations: ' . $e->getMessage(), 500);
 }

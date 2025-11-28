@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../../config/database.php';
 require_once __DIR__ . '/../../../utils/response.php';
 require_once __DIR__ . '/../../../utils/auth.php';
+require_once __DIR__ . '/../../../utils/logger.php';
+
+Logger::logRequest('/api/profile/settings', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/profile/settings', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -24,6 +28,7 @@ try {
     
     if (!$settings) {
         // Return defaults if no settings found
+        Logger::logSuccess('/api/profile/settings', 'Returning default settings');
         Response::success([
             'notifications_enabled' => true,
             'email_alerts' => true,
@@ -39,7 +44,9 @@ try {
         'theme' => $settings['theme']
     ];
     
+    Logger::logSuccess('/api/profile/settings', 'Settings fetched');
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/profile/settings', $e->getMessage(), 500);
     Response::error('Failed to fetch settings: ' . $e->getMessage(), 500);
 }

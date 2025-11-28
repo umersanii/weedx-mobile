@@ -8,8 +8,12 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
 require_once __DIR__ . '/../../utils/image_helper.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/profile', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/profile', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -64,7 +68,9 @@ try {
         ] : null
     ];
     
+    Logger::logSuccess('/api/profile', 'Profile fetched for user: ' . $user['email']);
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/profile', $e->getMessage(), 500);
     Response::error('Failed to fetch profile: ' . $e->getMessage(), 500);
 }

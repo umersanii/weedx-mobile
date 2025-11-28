@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../utils/response.php';
 require_once __DIR__ . '/../utils/auth.php';
+require_once __DIR__ . '/../utils/logger.php';
+
+Logger::logRequest('/api/reports', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/reports', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -58,7 +62,9 @@ try {
         'weed_distribution' => $distribution
     ];
     
+    Logger::logSuccess('/api/reports', 'Reports data fetched, Total weeds: ' . $response['widgets']['total_weeds']);
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/reports', $e->getMessage(), 500);
     Response::error('Failed to fetch reports: ' . $e->getMessage(), 500);
 }

@@ -7,9 +7,13 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/summary/today', 'GET');
 
 // Validate token
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/summary/today', $tokenData['userId'] ?? null, true);
 
 // Connect to database
 $database = new Database();
@@ -47,8 +51,10 @@ try {
         'operating_hours' => round((float)$hours['hours'], 2)
     ];
     
+    Logger::logSuccess('/api/summary/today', 'Weeds: ' . $response['weeds_detected'] . ', Area: ' . $response['area_covered']);
     Response::success($response);
     
 } catch (Exception $e) {
+    Logger::logError('/api/summary/today', $e->getMessage(), 500);
     Response::error('Failed to fetch summary: ' . $e->getMessage(), 500);
 }

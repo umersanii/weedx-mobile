@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../utils/response.php';
 require_once __DIR__ . '/../utils/auth.php';
+require_once __DIR__ . '/../utils/logger.php';
+
+Logger::logRequest('/api/weed-logs', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/weed-logs', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -52,7 +56,9 @@ try {
         }, $detections)
     ];
     
+    Logger::logSuccess('/api/weed-logs', 'Fetched ' . count($response['detections']) . ' detections');
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/weed-logs', $e->getMessage(), 500);
     Response::error('Failed to fetch weed logs: ' . $e->getMessage(), 500);
 }
