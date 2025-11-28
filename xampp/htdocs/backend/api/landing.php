@@ -26,7 +26,7 @@ try {
     $robotStmt = $db->query($robotQuery);
     $robotStatus = $robotStmt->fetch();
     
-    // Get today's summary
+    // Get today's summary (weeds detected)
     $summaryQuery = "
         SELECT 
             COUNT(*) as total_weeds,
@@ -37,10 +37,17 @@ try {
     $summaryStmt = $db->query($summaryQuery);
     $summary = $summaryStmt->fetch();
     
-    // Get area covered today
-    $areaQuery = "SELECT COALESCE(SUM(area_covered), 0) as area_covered FROM robot_sessions WHERE DATE(start_time) = CURDATE()";
-    $areaStmt = $db->query($areaQuery);
-    $areaData = $areaStmt->fetch();
+    // Get area covered and herbicide used today from robot_sessions
+    $sessionQuery = "
+        SELECT 
+            COALESCE(SUM(area_covered), 0) as area_covered,
+            COALESCE(SUM(herbicide_used), 0) as herbicide_used,
+            COALESCE(SUM(TIMESTAMPDIFF(MINUTE, start_time, IFNULL(end_time, NOW()))), 0) as session_duration
+        FROM robot_sessions 
+        WHERE DATE(start_time) = CURDATE()
+    ";
+    $sessionStmt = $db->query($sessionQuery);
+    $sessionData = $sessionStmt->fetch();
     
     // Get recent alerts (last 5)
     $alertsQuery = "SELECT * FROM alerts ORDER BY created_at DESC LIMIT 5";
@@ -51,16 +58,16 @@ try {
         'robot_status' => [
             'status' => $robotStatus['status'] ?? 'offline',
             'battery' => (int)($robotStatus['battery_level'] ?? 0),
-            'location' => [
-                'latitude' => (float)($robotStatus['latitude'] ?? 0),
-                'longitude' => (float)($robotStatus['longitude'] ?? 0)
-            ],
+            'latitude' => (float)($robotStatus['latitude'] ?? 0),
+            'longitude' => (float)($robotStatus['longitude'] ?? 0),
             'speed' => (float)($robotStatus['speed'] ?? 0),
             'last_updated' => $robotStatus['updated_at'] ?? null
         ],
         'todays_summary' => [
             'weeds_detected' => (int)($summary['today_weeds'] ?? 0),
-            'area_covered' => (float)($areaData['area_covered'] ?? 0),
+            'area_covered' => (float)($sessionData['area_covered'] ?? 0),
+            'herbicide_used' => (float)($sessionData['herbicide_used'] ?? 0),
+            'session_duration' => (int)($sessionData['session_duration'] ?? 0),
             'avg_confidence' => (float)($summary['avg_confidence'] ?? 0),
             'total_weeds_alltime' => (int)($summary['total_weeds'] ?? 0)
         ],
@@ -70,7 +77,8 @@ try {
                 'type' => $alert['type'],
                 'severity' => $alert['severity'],
                 'message' => $alert['message'],
-                'timestamp' => $alert['created_at']
+                'timestamp' => $alert['created_at'],
+                'is_read' => (bool)($alert['is_read'] ?? false)
             ];
         }, $alerts)
     ];

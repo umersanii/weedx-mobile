@@ -26,6 +26,8 @@ class DashboardActivity : AppCompatActivity() {
     
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var liveCard: CardView
+    private lateinit var weatherQuickCard: CardView
+    private lateinit var weedLogsQuickCard: CardView
     private lateinit var weedsDetectedValue: TextView
     private lateinit var herbicideUsedValue: TextView
     private lateinit var areaCoveredValue: TextView
@@ -36,6 +38,11 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var alertsRecyclerView: RecyclerView
     private lateinit var noAlertsText: TextView
     private lateinit var alertAdapter: AlertAdapter
+    
+    // Quick card values
+    private lateinit var weatherTempValue: TextView
+    private lateinit var totalWeedsValue: TextView
+    private lateinit var robotStatusQuickValue: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +62,8 @@ class DashboardActivity : AppCompatActivity() {
         // Initialize views
         bottomNavigation = findViewById(R.id.bottomNavigation)
         liveCard = findViewById(R.id.liveCard)
+        weatherQuickCard = findViewById(R.id.weatherQuickCard)
+        weedLogsQuickCard = findViewById(R.id.weedLogsQuickCard)
         weedsDetectedValue = findViewById(R.id.weedsDetectedValue)
         herbicideUsedValue = findViewById(R.id.herbicideUsedValue)
         areaCoveredValue = findViewById(R.id.areaCoveredValue)
@@ -62,6 +71,11 @@ class DashboardActivity : AppCompatActivity() {
         locationValue = findViewById(R.id.locationValue)
         speedValue = findViewById(R.id.speedValue)
         reportsButton = findViewById(R.id.reportsButton)
+        
+        // Quick card values
+        weatherTempValue = findViewById(R.id.weatherTempValue)
+        totalWeedsValue = findViewById(R.id.totalWeedsValue)
+        robotStatusQuickValue = findViewById(R.id.robotStatusQuickValue)
 
         // Setup alerts RecyclerView
         setupAlertsRecyclerView()
@@ -78,6 +92,7 @@ class DashboardActivity : AppCompatActivity() {
         // Load data after UI is set up
         viewModel.loadDashboardData()
         viewModel.loadAlerts()
+        viewModel.loadWeather()
     }
     
     private fun setupAlertsRecyclerView() {
@@ -98,10 +113,10 @@ class DashboardActivity : AppCompatActivity() {
                 viewModel.dashboardState.collect { state ->
                     when (state) {
                         is DashboardViewModel.DashboardState.Idle -> {
-                            // Initial state
+                            // Initial state - show defaults
                         }
                         is DashboardViewModel.DashboardState.Loading -> {
-                            // Show loading state
+                            // Show loading state (could add shimmer here)
                         }
                         is DashboardViewModel.DashboardState.Success -> {
                             updateDashboardUI(state.data)
@@ -112,6 +127,7 @@ class DashboardActivity : AppCompatActivity() {
                                 "Error: ${state.message}",
                                 Toast.LENGTH_SHORT
                             ).show()
+                            resetUIToDefaults()
                         }
                     }
                 }
@@ -121,6 +137,7 @@ class DashboardActivity : AppCompatActivity() {
                     "Dashboard error: ${e.message}",
                     Toast.LENGTH_SHORT
                 ).show()
+                resetUIToDefaults()
             }
         }
         
@@ -152,21 +169,69 @@ class DashboardActivity : AppCompatActivity() {
                 ).show()
             }
         }
+        
+        lifecycleScope.launch {
+            try {
+                viewModel.weatherState.collect { state ->
+                    when (state) {
+                        is DashboardViewModel.WeatherState.Idle -> {
+                            // Initial state
+                        }
+                        is DashboardViewModel.WeatherState.Loading -> {
+                            // Show loading state
+                        }
+                        is DashboardViewModel.WeatherState.Success -> {
+                            updateWeatherUI(state.weather)
+                        }
+                        is DashboardViewModel.WeatherState.Error -> {
+                            weatherTempValue.text = "--°C"
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                weatherTempValue.text = "--°C"
+            }
+        }
     }
     
     private fun updateDashboardUI(data: com.example.weedx.data.models.response.DashboardResponse) {
         try {
             // Update robot status
-            batteryValue.text = "${data.robotStatus.battery}%"
-            locationValue.text = data.robotStatus.status
-            speedValue.text = String.format("%.1f", data.robotStatus.speed ?: 0.0)
+            batteryValue.text = if (data.robotStatus.battery >= 0) "${data.robotStatus.battery}%" else "--"
+            locationValue.text = data.robotStatus.status.ifEmpty { "--" }
+            speedValue.text = data.robotStatus.speed?.let { String.format("%.1f", it) } ?: "--"
+            
+            // Update quick card for robot status
+            robotStatusQuickValue.text = data.robotStatus.status.ifEmpty { "--" }
             
             // Update today's summary
-            weedsDetectedValue.text = data.todaySummary.weedsDetected.toString()
-            herbicideUsedValue.text = String.format("%.1fL", data.todaySummary.herbicideUsed)
-            areaCoveredValue.text = String.format("%.1fha", data.todaySummary.areaCovered)
+            weedsDetectedValue.text = if (data.todaySummary.weedsDetected >= 0) data.todaySummary.weedsDetected.toString() else "--"
+            totalWeedsValue.text = if (data.todaySummary.weedsDetected >= 0) data.todaySummary.weedsDetected.toString() else "--"
+            herbicideUsedValue.text = if (data.todaySummary.herbicideUsed >= 0) String.format("%.1fL", data.todaySummary.herbicideUsed) else "--"
+            areaCoveredValue.text = if (data.todaySummary.areaCovered >= 0) String.format("%.1fha", data.todaySummary.areaCovered) else "--"
         } catch (e: Exception) {
             Toast.makeText(this, "Error updating UI: ${e.message}", Toast.LENGTH_SHORT).show()
+            resetUIToDefaults()
+        }
+    }
+    
+    private fun resetUIToDefaults() {
+        batteryValue.text = "--"
+        locationValue.text = "--"
+        speedValue.text = "--"
+        weedsDetectedValue.text = "--"
+        herbicideUsedValue.text = "--"
+        areaCoveredValue.text = "--"
+        totalWeedsValue.text = "--"
+        robotStatusQuickValue.text = "--"
+        weatherTempValue.text = "--°C"
+    }
+    
+    private fun updateWeatherUI(weather: com.example.weedx.data.models.response.CurrentWeather) {
+        try {
+            weatherTempValue.text = String.format("%.0f°C", weather.temperature)
+        } catch (e: Exception) {
+            weatherTempValue.text = "--°C"
         }
     }
     
@@ -197,6 +262,18 @@ class DashboardActivity : AppCompatActivity() {
         // Live card click listener
         liveCard.setOnClickListener {
             val intent = Intent(this, LiveMonitoringActivity::class.java)
+            startActivity(intent)
+        }
+        
+        // Weather quick card click listener
+        weatherQuickCard.setOnClickListener {
+            val intent = Intent(this, WeatherActivity::class.java)
+            startActivity(intent)
+        }
+        
+        // Weed logs quick card click listener
+        weedLogsQuickCard.setOnClickListener {
+            val intent = Intent(this, WeedLogsActivity::class.java)
             startActivity(intent)
         }
         

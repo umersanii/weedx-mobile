@@ -2,15 +2,16 @@
 
 ## Table of Contents
 1. [User Login](#1-user-login)
-2. [View Dashboard](#2-view-dashboard)
-3. [Check Robot Status](#3-check-robot-status)
-4. [View Weed Logs](#4-view-weed-logs)
-5. [Monitor Live Data](#5-monitor-live-data)
-6. [Check Weather & Soil](#6-check-weather--soil)
-7. [Generate Reports](#7-generate-reports)
-8. [Browse Image Gallery](#8-browse-image-gallery)
-9. [Ask Assistant](#9-ask-assistant)
-10. [Manage Profile](#10-manage-profile)
+2. [User Registration](#2-user-registration)
+3. [View Dashboard](#3-view-dashboard)
+4. [Check Robot Status](#4-check-robot-status)
+5. [View Weed Logs](#5-view-weed-logs)
+6. [Monitor Live Data](#6-monitor-live-data)
+7. [Check Weather & Soil](#7-check-weather--soil)
+8. [Generate Reports](#8-generate-reports)
+9. [Browse Image Gallery](#9-browse-image-gallery)
+10. [Ask Assistant](#10-ask-assistant)
+11. [Manage Profile](#11-manage-profile)
 
 ---
 
@@ -43,7 +44,73 @@
 
 ---
 
-## 2. View Dashboard
+## 2. User Registration
+
+**Actor**: New User  
+**Goal**: Create a new account with farm information  
+**Precondition**: User does not have an account
+
+### Flow
+1. User opens app → Login screen displayed
+2. User taps "Sign Up" tab
+3. **App**: Navigates to SignUpActivity
+4. **Step 1 - User Information**:
+   - User enters: Full Name, Email, Phone (optional), Password, Confirm Password
+   - Taps "Next"
+   - **App**: Validates inputs (email format, password length, passwords match)
+5. **Step 2 - Farm Information**:
+   - User enters: Farm Name, Location, Size (hectares)
+   - User selects crop types (Wheat, Corn, Rice, etc.)
+   - Taps "Next"
+   - **App**: Validates farm fields
+6. **Step 3 - App Settings**:
+   - User configures: Push Notifications, Email Alerts
+   - User selects: Language, Theme (Light/Dark/System)
+   - User checks "Terms of Service" checkbox
+   - Taps "Create Account"
+7. **App**: Shows loading indicator
+8. **App**: Calls `POST /auth/register` with all data
+9. **Backend**: 
+   - Validates all fields
+   - Creates user record
+   - Creates farm record linked to user
+   - Creates user_settings record
+   - Generates JWT token
+10. **App**: Stores token in SharedPreferences
+11. **App**: Navigates to Dashboard screen
+
+### Success
+- User sees dashboard with "Welcome, [Name]"
+- Account created with farm and preferences
+- Token stored for future requests
+
+### Error Scenarios
+- **Email exists**: Show "Email already registered"
+- **Validation error**: Highlight field with error message
+- **Network error**: Show "Check your connection"
+- **Backend error**: Show "Registration failed, try again"
+
+### Data Collected
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "secure123",
+  "phone": "+1234567890",
+  "farmName": "Green Valley Farm",
+  "farmLocation": "California, USA",
+  "farmSize": 50.5,
+  "cropTypes": ["Wheat", "Corn"],
+  "notificationsEnabled": true,
+  "emailAlerts": true,
+  "language": "en",
+  "theme": "light"
+}
+```
+
+---
+
+## 3. View Dashboard
 
 **Actor**: Logged-in User  
 **Goal**: See overview of farm/robot status  
@@ -72,7 +139,7 @@
 
 ---
 
-## 3. Check Robot Status
+## 4. Check Robot Status
 
 **Actor**: User  
 **Goal**: Get detailed robot health/location  
@@ -99,7 +166,7 @@
 
 ---
 
-## 4. View Weed Logs
+## 5. View Weed Logs
 
 **Actor**: User  
 **Goal**: See history of detected weeds  
@@ -127,7 +194,7 @@
 
 ---
 
-## 5. Monitor Live Data
+## 6. Monitor Live Data
 
 **Actor**: User  
 **Goal**: Watch real-time robot metrics  
@@ -156,7 +223,7 @@
 
 ---
 
-## 6. Check Weather & Soil
+## 7. Check Weather & Soil
 
 **Actor**: User  
 **Goal**: View environmental conditions  
@@ -187,7 +254,7 @@
 
 ---
 
-## 7. Generate Reports
+## 8. Generate Reports
 
 **Actor**: User  
 **Goal**: View farming performance metrics  
@@ -216,7 +283,7 @@
 
 ---
 
-## 8. Browse Image Gallery
+## 9. Browse Image Gallery
 
 **Actor**: User  
 **Goal**: View weed detection images  
@@ -246,7 +313,7 @@
 
 ---
 
-## 9. Ask Assistant
+## 10. Ask Assistant
 
 **Actor**: User  
 **Goal**: Get farming advice via chatbot  
@@ -275,7 +342,7 @@
 
 ---
 
-## 10. Manage Profile
+## 11. Manage Profile
 
 **Actor**: User  
 **Goal**: Update personal/farm information  

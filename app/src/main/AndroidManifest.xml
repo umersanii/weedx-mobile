@@ -27,6 +27,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".SignUpActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".DashboardActivity"
             android:exported="false" />
         <activity
