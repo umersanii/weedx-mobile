@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/environment/soil', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/environment/soil', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -27,7 +31,9 @@ try {
         'recorded_at' => $soil['recorded_at'] ?? date('Y-m-d H:i:s')
     ];
     
+    Logger::logSuccess('/api/environment/soil', 'Moisture: ' . $response['moisture'] . '%, pH: ' . $response['ph']);
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/environment/soil', $e->getMessage(), 500);
     Response::error('Failed to fetch soil data: ' . $e->getMessage(), 500);
 }

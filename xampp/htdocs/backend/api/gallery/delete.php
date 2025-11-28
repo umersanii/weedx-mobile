@@ -7,14 +7,18 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+$imageId = $_GET['id'] ?? null;
+Logger::logRequest('/api/gallery/' . $imageId, 'DELETE');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/gallery/' . $imageId, $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
-$imageId = $_GET['id'] ?? null;
-
 if (!$imageId) {
+    Logger::logError('/api/gallery/:id', 'Image ID required', 400);
     Response::error('Image ID required', 400);
 }
 
@@ -28,6 +32,7 @@ try {
     $image = $selectStmt->fetch();
     
     if (!$image) {
+        Logger::logError('/api/gallery/' . $imageId, 'Image not found', 404);
         Response::error('Image not found', 404);
     }
     
@@ -43,10 +48,13 @@ try {
             unlink($filepath);
         }
         
+        Logger::logSuccess('/api/gallery/' . $imageId, 'Image deleted');
         Response::success(null, 'Image deleted successfully');
     } else {
+        Logger::logError('/api/gallery/' . $imageId, 'Failed to delete image', 500);
         Response::error('Failed to delete image', 500);
     }
 } catch (Exception $e) {
+    Logger::logError('/api/gallery/' . $imageId, $e->getMessage(), 500);
     Response::error('Failed to delete image: ' . $e->getMessage(), 500);
 }

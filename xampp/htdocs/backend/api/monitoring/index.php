@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/monitoring', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/monitoring', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -42,7 +46,9 @@ try {
         ]
     ];
     
+    Logger::logSuccess('/api/monitoring', 'Battery: ' . $response['metrics']['battery'] . '%, Coverage: ' . $response['metrics']['coverage']);
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/monitoring', $e->getMessage(), 500);
     Response::error('Failed to fetch monitoring data: ' . $e->getMessage(), 500);
 }

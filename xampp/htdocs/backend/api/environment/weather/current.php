@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../../config/database.php';
 require_once __DIR__ . '/../../../utils/response.php';
 require_once __DIR__ . '/../../../utils/auth.php';
+require_once __DIR__ . '/../../../utils/logger.php';
+
+Logger::logRequest('/api/environment/weather/current', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/environment/weather/current', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -26,7 +30,9 @@ try {
         'recorded_at' => $weather['recorded_at'] ?? date('Y-m-d H:i:s')
     ];
     
+    Logger::logSuccess('/api/environment/weather/current', 'Temp: ' . $response['temperature'] . '°C, Condition: ' . $response['condition']);
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/environment/weather/current', $e->getMessage(), 500);
     Response::error('Failed to fetch weather: ' . $e->getMessage(), 500);
 }

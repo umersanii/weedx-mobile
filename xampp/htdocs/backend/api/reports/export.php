@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/reports/export', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/reports/export', $tokenData['userId'] ?? null, true);
 
 $format = $_GET['format'] ?? 'csv';
 
@@ -22,6 +26,7 @@ if (!in_array($format, ['pdf', 'csv'])) {
 $filename = 'weedx_report_' . date('Y-m-d') . '.' . $format;
 $downloadUrl = '/downloads/reports/' . $filename;
 
+Logger::logSuccess('/api/reports/export', 'Report queued: ' . $filename);
 Response::success([
     'format' => $format,
     'filename' => $filename,

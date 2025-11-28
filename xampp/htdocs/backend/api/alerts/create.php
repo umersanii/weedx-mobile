@@ -7,6 +7,9 @@
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/alerts/create', 'POST');
 
 // Allow CORS
 header('Access-Control-Allow-Origin: *');
@@ -52,6 +55,7 @@ try {
     
     $alertId = $db->lastInsertId();
     
+    Logger::logSuccess('/api/alerts/create', 'Alert created: ' . $type . ' (' . $severity . ')');
     Response::success([
         'id' => (int)$alertId,
         'type' => $type,
@@ -61,5 +65,6 @@ try {
     ], 'Alert created successfully');
     
 } catch (Exception $e) {
+    Logger::logError('/api/alerts/create', $e->getMessage(), 500);
     Response::error('Failed to create alert: ' . $e->getMessage(), 500);
 }

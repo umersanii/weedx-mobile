@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/assistant/query', 'POST');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/assistant/query', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -41,12 +45,14 @@ try {
     $respStmt->bindParam(':message', $response);
     $respStmt->execute();
     
+    Logger::logSuccess('/api/assistant/query', 'Query processed: ' . substr($query, 0, 50) . '...');
     Response::success([
         'query' => $query,
         'response' => $response,
         'timestamp' => date('Y-m-d H:i:s')
     ]);
 } catch (Exception $e) {
+    Logger::logError('/api/assistant/query', $e->getMessage(), 500);
     Response::error('Failed to process query: ' . $e->getMessage(), 500);
 }
 

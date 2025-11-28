@@ -7,9 +7,13 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/alerts/recent', 'GET');
 
 // Validate token
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/alerts/recent', $tokenData['userId'] ?? null, true);
 
 // Connect to database
 $database = new Database();
@@ -36,8 +40,10 @@ try {
         ];
     }, $alerts);
     
+    Logger::logSuccess('/api/alerts/recent', 'Fetched ' . count($response) . ' alerts');
     Response::success($response);
     
 } catch (Exception $e) {
+    Logger::logError('/api/alerts/recent', $e->getMessage(), 500);
     Response::error('Failed to fetch alerts: ' . $e->getMessage(), 500);
 }

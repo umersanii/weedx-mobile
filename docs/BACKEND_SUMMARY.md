@@ -1,7 +1,7 @@
 # Backend Implementation Complete ✅
 
 **Status**: 🚀 **DEPLOYED & OPERATIONAL**  
-**Date**: November 21, 2025  
+**Date**: November 28, 2025 (Updated)  
 **URL**: `http://raspberrypi.mullet-bull.ts.net/weedx-backend/`  
 **Location**: `/var/www/html/weedx-backend/` on Raspberry Pi
 
@@ -109,6 +109,7 @@ A complete PHP REST API backend for the WeedX precision farming system with:
 - **Error Handling** - Comprehensive error responses
 - **Input Validation** - Sanitized inputs, SQL injection protection
 - **Documentation** - Complete README and QUICKSTART guides
+- **API Logging** - All endpoints log requests/responses to `logs/api_YYYY-MM-DD.log`
 
 ## 📁 File Structure
 
@@ -136,7 +137,10 @@ backend/
 │   └── subscriber.php          # MQTT listener
 ├── utils/
 │   ├── response.php            # Response helper
-│   └── auth.php                # JWT authentication
+│   ├── auth.php                # JWT authentication
+│   └── logger.php              # API request/response logging
+├── logs/                        # API logs directory
+│   └── api_YYYY-MM-DD.log      # Daily log files
 ├── .htaccess                    # Apache routing
 ├── index.php                    # Main router
 ├── composer.json               # Dependencies

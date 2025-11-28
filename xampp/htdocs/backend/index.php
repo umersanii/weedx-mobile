@@ -18,10 +18,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/utils/response.php';
 require_once __DIR__ . '/utils/auth.php';
+require_once __DIR__ . '/utils/logger.php';
 
 // Get request path
 $request = $_GET['request'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
+
+// Log incoming request
+Logger::logRequest('/api/' . $request, $method);
 
 // Remove trailing slash
 $request = rtrim($request, '/');

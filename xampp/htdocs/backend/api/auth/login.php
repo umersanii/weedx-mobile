@@ -8,6 +8,9 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/firebase.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/auth/login', 'POST');
 
 // Get POST data
 $data = json_decode(file_get_contents("php://input"), true);
@@ -57,6 +60,8 @@ $updateStmt->bindParam(':id', $user['id']);
 $updateStmt->execute();
 
 // Return success response
+Logger::logAuth('/api/auth/login', $user['id'], true);
+Logger::logSuccess('/api/auth/login', 'User logged in: ' . $user['email']);
 Response::success([
     'token' => $token,
     'user' => [

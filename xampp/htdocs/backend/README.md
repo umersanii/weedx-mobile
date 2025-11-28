@@ -266,13 +266,34 @@ backend/
 │   └── avatars/           # User avatars
 ├── utils/                 # Helper functions
 │   ├── response.php       # Response formatter
-│   └── auth.php           # JWT authentication
+│   ├── auth.php           # JWT authentication
+│   └── logger.php         # API request/response logging
+├── logs/                  # API log files
+│   └── api_YYYY-MM-DD.log # Daily rotating logs
 ├── .htaccess              # Apache rewrite rules
 ├── index.php              # Main router
 └── README.md              # This file
 ```
 
 ## 🔧 Troubleshooting
+
+### View API Logs
+
+All API requests are logged for debugging:
+
+```bash
+# View today's logs
+tail -f /var/www/html/weedx-backend/logs/api_$(date +%Y-%m-%d).log
+
+# Or via Apache error log (real-time)
+sudo tail -f /var/log/apache2/error.log | grep -E '\[API|REQUEST|AUTH|SUCCESS|ERROR\]'
+```
+
+Log format shows:
+- Request method & endpoint
+- Auth status (with/without token)
+- Response success/error with data
+- Timestamps for each call
 
 ### "404 Not Found" on all endpoints
 

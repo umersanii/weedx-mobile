@@ -7,8 +7,12 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
+
+Logger::logRequest('/api/monitoring/location', 'GET');
 
 $tokenData = Auth::validateToken();
+Logger::logAuth('/api/monitoring/location', $tokenData['userId'] ?? null, true);
 $database = new Database();
 $db = $database->getConnection();
 
@@ -24,7 +28,9 @@ try {
         'last_updated' => $location['updated_at'] ?? null
     ];
     
+    Logger::logSuccess('/api/monitoring/location', 'Lat: ' . $response['latitude'] . ', Lng: ' . $response['longitude']);
     Response::success($response);
 } catch (Exception $e) {
+    Logger::logError('/api/monitoring/location', $e->getMessage(), 500);
     Response::error('Failed to fetch location: ' . $e->getMessage(), 500);
 }
