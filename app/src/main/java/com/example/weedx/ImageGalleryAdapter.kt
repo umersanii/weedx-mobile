@@ -5,10 +5,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import coil.transform.RoundedCornersTransformation
+import com.example.weedx.data.models.response.GalleryImage
 
-class ImageGalleryAdapter(private val images: List<GalleryImage>) :
-    RecyclerView.Adapter<ImageGalleryAdapter.ImageViewHolder>() {
+class ImageGalleryAdapter(
+    private val onImageClick: ((GalleryImage) -> Unit)? = null
+) : ListAdapter<GalleryImage, ImageGalleryAdapter.ImageViewHolder>(GalleryDiffCallback()) {
 
     class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val galleryImage: ImageView = view.findViewById(R.id.galleryImage)
@@ -23,21 +29,41 @@ class ImageGalleryAdapter(private val images: List<GalleryImage>) :
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        val image = images[position]
+        val image = getItem(position)
         
-        holder.zoneLabel.text = image.zone
+        // Display weed type as label
+        holder.zoneLabel.text = image.weedType
         
-        // For now, show placeholder icon (in a real app, load actual images)
-        holder.placeholderIcon.visibility = View.VISIBLE
-        holder.galleryImage.visibility = View.GONE
+        // Load image using Coil
+        if (image.url.isNotEmpty()) {
+            holder.placeholderIcon.visibility = View.GONE
+            holder.galleryImage.visibility = View.VISIBLE
+            
+            holder.galleryImage.load(image.url) {
+                crossfade(true)
+                placeholder(R.drawable.ic_info) // Use as placeholder
+                error(R.drawable.ic_info) // Use as error placeholder
+                transformations(RoundedCornersTransformation(16f))
+            }
+        } else {
+            // Show placeholder if no URL
+            holder.placeholderIcon.visibility = View.VISIBLE
+            holder.galleryImage.visibility = View.GONE
+        }
         
-        // If you have actual images, you would load them like this:
-        // if (image.imagePath != null) {
-        //     holder.placeholderIcon.visibility = View.GONE
-        //     holder.galleryImage.visibility = View.VISIBLE
-        //     // Load image using Glide/Picasso/Coil
-        // }
+        // Handle click
+        holder.itemView.setOnClickListener {
+            onImageClick?.invoke(image)
+        }
     }
 
-    override fun getItemCount(): Int = images.size
+    class GalleryDiffCallback : DiffUtil.ItemCallback<GalleryImage>() {
+        override fun areItemsTheSame(oldItem: GalleryImage, newItem: GalleryImage): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: GalleryImage, newItem: GalleryImage): Boolean {
+            return oldItem == newItem
+        }
+    }
 }

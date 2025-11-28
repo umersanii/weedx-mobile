@@ -2,20 +2,38 @@ package com.example.weedx
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.weedx.presentation.viewmodels.GalleryUiState
+import com.example.weedx.presentation.viewmodels.GalleryViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class ImageGalleryActivity : AppCompatActivity() {
 
+    private val viewModel: GalleryViewModel by viewModels()
+    
     private lateinit var imageGalleryRecyclerView: RecyclerView
     private lateinit var imageGalleryAdapter: ImageGalleryAdapter
     private lateinit var bottomNavigation: BottomNavigationView
-    private val galleryImages = mutableListOf<GalleryImage>()
+    private lateinit var progressBar: ProgressBar
+    private lateinit var errorLayout: View
+    private lateinit var errorTextView: TextView
+    private lateinit var retryButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,28 +50,83 @@ class ImageGalleryActivity : AppCompatActivity() {
             insets
         }
 
-        // Initialize views
-        imageGalleryRecyclerView = findViewById(R.id.imageGalleryRecyclerView)
-        bottomNavigation = findViewById(R.id.bottomNavigation)
-
+        initializeViews()
         setupGallery()
         setupBottomNavigation()
+        observeUiState()
+    }
+
+    private fun initializeViews() {
+        imageGalleryRecyclerView = findViewById(R.id.imageGalleryRecyclerView)
+        bottomNavigation = findViewById(R.id.bottomNavigation)
+        
+        // Check if these views exist in the layout, otherwise skip
+        progressBar = findViewById<ProgressBar?>(R.id.progressBar) ?: ProgressBar(this).apply {
+            visibility = View.GONE
+        }
+        errorLayout = findViewById<View?>(R.id.errorLayout) ?: View(this).apply {
+            visibility = View.GONE
+        }
+        errorTextView = findViewById<TextView?>(R.id.errorTextView) ?: TextView(this)
+        retryButton = findViewById<Button?>(R.id.retryButton) ?: Button(this)
+        
+        retryButton.setOnClickListener {
+            viewModel.retry()
+        }
     }
 
     private fun setupGallery() {
-        // Create sample gallery images (all from zone A-12 as shown in design)
-        galleryImages.apply {
-            repeat(8) {
-                add(GalleryImage(zone = "A-12"))
-            }
-        }
-
         // Setup RecyclerView with GridLayoutManager (2 columns)
-        imageGalleryAdapter = ImageGalleryAdapter(galleryImages)
+        imageGalleryAdapter = ImageGalleryAdapter { image ->
+            // Handle image click - could open full screen view
+            // TODO: Implement full screen image viewer
+        }
+        
         imageGalleryRecyclerView.apply {
             layoutManager = GridLayoutManager(this@ImageGalleryActivity, 2)
             adapter = imageGalleryAdapter
         }
+    }
+
+    private fun observeUiState() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    when (state) {
+                        is GalleryUiState.Loading -> {
+                            showLoading()
+                        }
+                        is GalleryUiState.Success -> {
+                            showSuccess(state.images)
+                        }
+                        is GalleryUiState.Error -> {
+                            showError(state.message)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showLoading() {
+        progressBar.visibility = View.VISIBLE
+        imageGalleryRecyclerView.visibility = View.GONE
+        errorLayout.visibility = View.GONE
+    }
+
+    private fun showSuccess(images: List<com.example.weedx.data.models.response.GalleryImage>) {
+        progressBar.visibility = View.GONE
+        imageGalleryRecyclerView.visibility = View.VISIBLE
+        errorLayout.visibility = View.GONE
+        
+        imageGalleryAdapter.submitList(images)
+    }
+
+    private fun showError(message: String) {
+        progressBar.visibility = View.GONE
+        imageGalleryRecyclerView.visibility = View.GONE
+        errorLayout.visibility = View.VISIBLE
+        errorTextView.text = message
     }
 
     private fun setupBottomNavigation() {
