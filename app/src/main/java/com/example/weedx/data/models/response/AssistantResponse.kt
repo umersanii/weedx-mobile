@@ -1,14 +1,18 @@
 package com.example.weedx.data.models.response
 
+import com.google.gson.annotations.SerializedName
+
 data class AssistantQueryResponse(
     val response: String,
     val timestamp: String,
-    val conversationId: Int?
+    @SerializedName("conversationId")
+    val conversationId: Int? = null
 )
 
 data class AssistantHistory(
     val id: Int,
-    val query: String,
-    val response: String,
+    val message: String,
+    @SerializedName("is_user")
+    val isUser: Boolean,
     val timestamp: String
 )

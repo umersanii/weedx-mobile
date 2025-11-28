@@ -41,6 +41,7 @@
     <string name="question_weekly_summary">Weekly summary report</string>
     <string name="input_hint">Ask a question...</string>
     <string name="send">Send</string>
+    <string name="typing">Typing…</string>
     
     <!-- Live Monitoring -->
     <string name="live_monitoring">Live Monitoring</string>

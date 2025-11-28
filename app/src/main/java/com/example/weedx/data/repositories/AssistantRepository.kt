@@ -23,7 +23,7 @@ class AssistantRepository @Inject constructor(
                 NetworkResult.Error(response.body()?.message ?: "Failed to send query")
             }
         } catch (e: Exception) {
-            NetworkResult.Error(e.localizedMessage ?: "Unknown error")
+            NetworkResult.Error(e.localizedMessage ?: "Network error. Please check your connection.")
         }
     }
     
@@ -33,12 +33,12 @@ class AssistantRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.data?.let {
                     NetworkResult.Success(it)
-                } ?: NetworkResult.Error("No data received")
+                } ?: NetworkResult.Success(emptyList()) // Return empty list if no data
             } else {
                 NetworkResult.Error(response.body()?.message ?: "Failed to fetch history")
             }
         } catch (e: Exception) {
-            NetworkResult.Error(e.localizedMessage ?: "Unknown error")
+            NetworkResult.Error(e.localizedMessage ?: "Network error. Please check your connection.")
         }
     }
 }
