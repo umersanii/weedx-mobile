@@ -4,19 +4,29 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.weedx.presentation.viewmodels.AssistantViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class AssistantActivity : AppCompatActivity() {
+
+    private val viewModel: AssistantViewModel by viewModels()
 
     private lateinit var chatRecyclerView: RecyclerView
     private lateinit var initialContentScrollView: ScrollView
@@ -62,6 +72,7 @@ class AssistantActivity : AppCompatActivity() {
         setupRecyclerView()
         setupClickListeners()
         setupBottomNavigation()
+        observeViewModel()
     }
 
     private fun setupRecyclerView() {
@@ -70,6 +81,47 @@ class AssistantActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@AssistantActivity)
             adapter = chatAdapter
             visibility = View.GONE
+        }
+    }
+
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            viewModel.messages.collectLatest { messages ->
+                chatMessages.clear()
+                chatMessages.addAll(messages)
+                chatAdapter.notifyDataSetChanged()
+                
+                if (messages.isNotEmpty()) {
+                    initialContentScrollView.visibility = View.GONE
+                    chatRecyclerView.visibility = View.VISIBLE
+                    chatRecyclerView.scrollToPosition(messages.size - 1)
+                } else {
+                    initialContentScrollView.visibility = View.VISIBLE
+                    chatRecyclerView.visibility = View.GONE
+                }
+            }
+        }
+        
+        lifecycleScope.launch {
+            viewModel.isLoading.collectLatest { isLoading ->
+                sendButton.isEnabled = !isLoading
+                messageInput.isEnabled = !isLoading
+            }
+        }
+        
+        lifecycleScope.launch {
+            viewModel.chatState.collectLatest { state ->
+                when (state) {
+                    is AssistantViewModel.ChatState.Error -> {
+                        Toast.makeText(
+                            this@AssistantActivity,
+                            "Error: ${state.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> { /* Handle other states if needed */ }
+                }
+            }
         }
     }
 
@@ -147,46 +199,8 @@ class AssistantActivity : AppCompatActivity() {
         initialContentScrollView.visibility = View.GONE
         chatRecyclerView.visibility = View.VISIBLE
 
-        // Add user message
-        chatMessages.add(ChatMessage(question, true))
-        chatAdapter.notifyItemInserted(chatMessages.size - 1)
-        chatRecyclerView.scrollToPosition(chatMessages.size - 1)
-
-        // Simulate assistant response
-        simulateAssistantResponse(question)
-    }
-
-    private fun simulateAssistantResponse(question: String) {
-        // Add a delay to simulate processing
-        messageInput.postDelayed({
-            val response = getResponseForQuestion(question)
-            chatMessages.add(ChatMessage(response, false))
-            chatAdapter.notifyItemInserted(chatMessages.size - 1)
-            chatRecyclerView.scrollToPosition(chatMessages.size - 1)
-        }, 1000)
-    }
-
-    private fun getResponseForQuestion(question: String): String {
-        return when {
-            question.contains("weeds", ignoreCase = true) &&
-            question.contains("today", ignoreCase = true) -> {
-                "Today, 142 weeds have been detected across Field A. The detection was last updated 2 minutes ago."
-            }
-            question.contains("battery", ignoreCase = true) -> {
-                "The robot's battery level is at 87%. It has enough charge for approximately 4 more hours of operation."
-            }
-            question.contains("robot", ignoreCase = true) &&
-            question.contains("doing", ignoreCase = true) -> {
-                "The robot is currently active in Field A, located at position A-12. It's moving at a speed of 2.4 and actively detecting and treating weeds."
-            }
-            question.contains("weekly", ignoreCase = true) ||
-            question.contains("summary", ignoreCase = true) -> {
-                "This week, the robot has covered 42.5 hectares, detected 856 weeds, and used 18.6L of herbicide through targeted treatment. The average efficiency is 95.2%."
-            }
-            else -> {
-                "I can help you with information about your robot status, weed detection data, battery levels, field coverage, and weekly summaries. What specific information would you like to know?"
-            }
-        }
+        // Send query to backend via ViewModel
+        viewModel.sendQuery(question)
     }
 }
 

@@ -1,11 +1,11 @@
 <?php
 /**
- * Weather Forecast Endpoint
- * GET /api/environment/weather/forecast
+ * Hourly Weather Forecast Endpoint
+ * GET /api/environment/weather/hourly
  * 
  * Uses farm location from user profile (location + country fields)
  * Query params (optional):
- *   days - number of forecast days (1-16, default: 7)
+ *   hours - number of hours (1-168, default: 24)
  */
 
 require_once __DIR__ . '/../../../config/database.php';
@@ -14,10 +14,10 @@ require_once __DIR__ . '/../../../utils/auth.php';
 require_once __DIR__ . '/../../../utils/logger.php';
 require_once __DIR__ . '/../../../utils/weather_service.php';
 
-Logger::logRequest('/api/environment/weather/forecast', 'GET');
+Logger::logRequest('/api/environment/weather/hourly', 'GET');
 
 $tokenData = Auth::validateToken();
-Logger::logAuth('/api/environment/weather/forecast', $tokenData['userId'] ?? null, true);
+Logger::logAuth('/api/environment/weather/hourly', $tokenData['userId'] ?? null, true);
 
 $database = new Database();
 $db = $database->getConnection();
@@ -25,7 +25,7 @@ $db = $database->getConnection();
 try {
     $weatherService = new WeatherService();
     $userId = $tokenData['userId'];
-    $days = isset($_GET['days']) ? (int)$_GET['days'] : 7;
+    $hours = isset($_GET['hours']) ? (int)$_GET['hours'] : 24;
     
     // Get user's farm location from database
     $farmQuery = "SELECT location, country FROM farms WHERE user_id = :userId LIMIT 1";
@@ -45,13 +45,13 @@ try {
         $locationName = $farm['location'] . ', ' . ($farm['country'] ?? '');
     }
     
-    // Fetch real forecast from Open-Meteo API
-    $data = $weatherService->getForecast($days, $lat, $lon);
+    // Fetch hourly forecast from Open-Meteo API
+    $data = $weatherService->getHourlyForecast($hours, $lat, $lon);
     $data['location']['name'] = $locationName;
     
-    Logger::logSuccess('/api/environment/weather/forecast', 'Fetched ' . count($data['forecast']) . ' days forecast');
+    Logger::logSuccess('/api/environment/weather/hourly', 'Fetched ' . count($data['hourly']) . ' hours forecast');
     Response::success($data);
 } catch (Exception $e) {
-    Logger::logError('/api/environment/weather/forecast', $e->getMessage(), 500);
-    Response::error('Failed to fetch forecast: ' . $e->getMessage(), 500);
+    Logger::logError('/api/environment/weather/hourly', $e->getMessage(), 500);
+    Response::error('Failed to fetch hourly forecast: ' . $e->getMessage(), 500);
 }
