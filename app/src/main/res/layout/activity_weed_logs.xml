@@ -6,13 +6,66 @@
     android:layout_height="match_parent"
     android:background="@color/background_light">
 
+    <!-- Loading Indicator -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Error Layout -->
+    <LinearLayout
+        android:id="@+id/errorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_alert_circle"
+            app:tint="@color/gray_text"
+            android:contentDescription="Error" />
+
+        <TextView
+            android:id="@+id/errorTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Failed to load weed logs"
+            android:textSize="16sp"
+            android:textColor="@color/gray_text"
+            android:gravity="center" />
+
+        <Button
+            android:id="@+id/retryButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/retry"
+            android:backgroundTint="@color/green_primary" />
+
+    </LinearLayout>
+
     <!-- Scrollable Content -->
     <ScrollView
+        android:id="@+id/contentLayout"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:fillViewport="true"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -114,6 +167,22 @@
 
             </LinearLayout>
 
+            <!-- Filter Chips (hidden by default) -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/weedTypeChipGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:singleSelection="true" />
+
+            </HorizontalScrollView>
+
             <!-- Statistics Cards -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -143,7 +212,7 @@
                             android:id="@+id/todayCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="142"
+                            android:text="--"
                             android:textSize="32sp"
                             android:textStyle="bold"
                             android:textColor="@color/green_primary" />
@@ -182,7 +251,7 @@
                             android:id="@+id/weekCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="1,247"
+                            android:text="--"
                             android:textSize="32sp"
                             android:textStyle="bold"
                             android:textColor="@color/green_primary" />
@@ -220,7 +289,7 @@
                             android:id="@+id/treatedPercent"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="98%"
+                            android:text="--%"
                             android:textSize="32sp"
                             android:textStyle="bold"
                             android:textColor="@color/green_primary" />
@@ -239,17 +308,41 @@
 
             </LinearLayout>
 
+            <!-- Weed Distribution Section Header -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Recent Detections"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
             <!-- Weed Logs List -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/weedLogsRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_weed_log" />
 
         </LinearLayout>
 
     </ScrollView>
+
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:menu="@menu/bottom_navigation_menu"
+        app:labelVisibilityMode="labeled"
+        app:itemIconTint="@drawable/bottom_nav_color"
+        app:itemTextColor="@drawable/bottom_nav_color" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

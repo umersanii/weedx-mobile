@@ -195,6 +195,8 @@ See [gradle/libs.versions.toml](gradle/libs.versions.toml) for full list.
 - [ ] Location instead of RID in profile page
 - [ ] Soil conditions in the weather page
 - [ ] Image path in the gallery
+- [ ] Images not being specific to account
+
 
 
 ---
