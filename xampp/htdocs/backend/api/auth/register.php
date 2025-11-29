@@ -8,7 +8,8 @@
 
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
-require_once __DIR__ . '/../../utils/jwt.php';
+require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -109,11 +110,10 @@ try {
     // Commit transaction
     $db->commit();
     
-    // Generate JWT token
-    $token = JWT::generate([
-        'userId' => $userId,
-        'email' => $input['email']
-    ]);
+    // Generate JWT token using Auth class
+    $token = Auth::generateToken($userId, $input['email']);
+    
+    Logger::logSuccess('/api/auth/register', 'User registered: ' . $input['email']);
     
     // Return success response
     Response::success([
