@@ -62,8 +62,7 @@ Robot → MQTT → PHP Backend → MySQL
    - Firebase Auth for user login  
    - Displays dashboards, logs, and reports
 
-📖 **Full Architecture**: [docs/architecture.md](docs/architecture.md)  
-📖 **Use Case Flows**: [docs/usecase_flows.md](docs/usecase_flows.md)
+📖 **Full Documentation**: [docs/architecture.md](docs/architecture.md) | [docs/guide.md](docs/guide.md)
 
 ---
 
@@ -82,10 +81,8 @@ app/src/main/java/com/example/weedx/
 └── utils/                # Constants, helpers
 
 docs/
-├── api_endpoints.md      # Backend API documentation
-├── architecture.md       # System architecture details
-├── implementation_status.md  # Development progress
-└── usecase_flows.md      # User flow diagrams
+├── architecture.md       # System architecture + API endpoints
+└── guide.md              # Complete setup & usage guide
 ```
 
 ---
@@ -116,13 +113,9 @@ docs/
    - Open `app/src/main/java/com/example/weedx/utils/Constants.kt`
    - Replace `BASE_URL` with your PHP backend endpoint:
      ```kotlin
-     const val BASE_URL = "https://your-backend.com/api/"
-     ```
-   - For Tailscale deployment (recommended):
-     ```kotlin
      const val BASE_URL = "http://raspberrypi.mullet-bull.ts.net/weedx-backend/"
      ```
-   - See [DEPLOYMENT_QUICK_START.md](DEPLOYMENT_QUICK_START.md) for deployment guide
+   - See [docs/guide.md](docs/guide.md) for deployment details
 
 4. **Build & Run**
    ```bash
@@ -131,17 +124,13 @@ docs/
    Or open in Android Studio and click ▶️ Run
 
 5. **Deploy Backend to Raspberry Pi** (Optional)
-   
-   If you want to run the backend on Raspberry Pi 24/7 via Tailscale:
    ```bash
-   # Interactive setup wizard (recommended)
+   # Interactive setup wizard
    ./scripts/setup-wizard.sh
    
    # Or manual deployment
    ./scripts/deploy-to-pi.sh
    ```
-   
-   See [DEPLOYMENT_QUICK_START.md](DEPLOYMENT_QUICK_START.md) for details.
 
 ---
 
@@ -153,20 +142,12 @@ The backend is running on Raspberry Pi and accessible via Tailscale network:
 - **Status**: All 30+ API endpoints working
 - **Location**: `/var/www/html/weedx-backend/`
 - **Database**: MySQL with 12 tables and sample data
-- **Quick Setup**: Run `./scripts/setup-wizard.sh` (if redeploying)
-- **Full Guide**: [docs/TAILSCALE_DEPLOYMENT.md](docs/TAILSCALE_DEPLOYMENT.md)
 
 Benefits:
 - ✅ Access backend from anywhere (no port forwarding)
 - ✅ Secure encrypted connection
 - ✅ Works on mobile/cellular networks
 - ✅ 24/7 availability on Raspberry Pi
-
----
-
-## 📱 Screenshots
-
-_Coming soon..._
 
 ---
 
@@ -204,6 +185,17 @@ Key libraries used:
 - **Material 3** - UI components
 
 See [gradle/libs.versions.toml](gradle/libs.versions.toml) for full list.
+
+---
+
+## 📋 Todo / Pending Tasks
+
+### High Priority
+- [ ] Avatar in profile page
+- [ ] Location instead of RID in profile page
+- [ ] Soil conditions in the weather page
+- [ ] Image path in the gallery
+
 
 ---
 

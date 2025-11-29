@@ -37,10 +37,6 @@ switch (true) {
         require __DIR__ . '/api/auth/login.php';
         break;
     
-    case $request === 'auth/register' && $method === 'POST':
-        require __DIR__ . '/api/auth/register.php';
-        break;
-    
     case $request === 'auth/logout' && $method === 'POST':
         require __DIR__ . '/api/auth/logout.php';
         break;
