@@ -9,7 +9,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
+import coil.load
 import com.example.weedx.data.models.response.WeedDetection
 import com.example.weedx.utils.Constants
 import java.text.SimpleDateFormat
@@ -61,12 +61,11 @@ class WeedLogsAdapter(
         // Load image if available
         detection.imageUrl?.let { url ->
             val fullUrl = Constants.getFullImageUrl(url)
-            Glide.with(holder.itemView.context)
-                .load(fullUrl)
-                .placeholder(R.drawable.ic_leaf)
-                .error(R.drawable.ic_leaf)
-                .centerCrop()
-                .into(holder.weedIcon)
+            holder.weedIcon.load(fullUrl) {
+                placeholder(R.drawable.ic_leaf)
+                error(R.drawable.ic_leaf)
+                crossfade(true)
+            }
         } ?: run {
             holder.weedIcon.setImageResource(R.drawable.ic_leaf)
         }

@@ -232,7 +232,6 @@ class ReportsActivity : AppCompatActivity() {
     private fun setupBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNav?.let { nav ->
-            nav.selectedItemId = R.id.nav_reports
             nav.setOnItemSelectedListener { item ->
                 when (item.itemId) {
                     R.id.nav_home -> {
@@ -240,12 +239,11 @@ class ReportsActivity : AppCompatActivity() {
                         finish()
                         true
                     }
-                    R.id.nav_monitoring -> {
-                        startActivity(Intent(this, MonitoringActivity::class.java))
+                    R.id.nav_weather -> {
+                        startActivity(Intent(this, LiveMonitoringActivity::class.java))
                         finish()
                         true
                     }
-                    R.id.nav_reports -> true
                     R.id.nav_profile -> {
                         startActivity(Intent(this, ProfileActivity::class.java))
                         finish()
