@@ -84,6 +84,9 @@ dependencies {
     // Coil
     implementation(libs.coil)
     
+    // MPAndroidChart
+    implementation(libs.mpandroidchart)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

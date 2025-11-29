@@ -199,6 +199,9 @@
     <string name="log_out">Log Out</string>
     <string name="app_version">WeedX v1.0.0</string>
     
+    <!-- General -->
+    <string name="retry">Retry</string>
+    
     <!-- Bottom Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_weather">Weather</string>

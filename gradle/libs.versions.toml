@@ -41,6 +41,9 @@ room = "2.6.1"
 # Coil for image loading
 coil = "2.6.0"
 
+# MPAndroidChart
+mpandroidchart = "v3.1.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -85,6 +88,9 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 # Coil
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+
+# MPAndroidChart
+mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpandroidchart" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
