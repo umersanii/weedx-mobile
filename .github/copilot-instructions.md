@@ -1,187 +1,130 @@
-Keep the responses short and consise, yet complete
-Only the docs in the docs/ and xampp/htdocs/backend/ directories are to be maintained
+# WeedX - Copilot Instructions
 
-# **Architecture**
+> Keep responses short and concise, yet complete.
 
-- Kotlin Android app + PHP/MySQL backend
-- Firebase Auth + FCM only (no MQTT in app)
-- Robot → MQTT → PHP → MySQL → REST API → Android
-- App is read-only dashboard (no robot control)
-- MVVM + Repository pattern, Hilt DI
-- See `docs/` for details
+## Architecture Overview
 
----
+**System flow:** Robot → MQTT → PHP Backend → MySQL → REST API → Android App
 
-# 📋 **Status**
+- **Android**: Kotlin + XML (Material 3) + MVVM + Hilt DI + ViewBinding
+- **Backend**: PHP REST API + MySQL (MariaDB) on Raspberry Pi via Tailscale
+- **Auth**: Firebase Auth in app, JWT tokens from backend
+- **App is read-only dashboard** - no robot control commands
 
-## ✅ Done - Backend (Nov 21, 2025)
-- ✅ **PHP Backend Deployed** on Arch Linux LAMP stack
-- ✅ Apache httpd + MariaDB + PHP 8.4.15 configured
-- ✅ Database schema with 12 tables (users, robot_status, weed_detections, weather_data, etc.)
-- ✅ 50+ REST API endpoints implemented
-- ✅ JWT authentication working (`/auth/login`)
-- ✅ CORS enabled, mod_rewrite configured
-- ✅ Sample data loaded, demo user created
-- ✅ Backend URL: `http://192.168.1.8/weedx-backend/`
-- ✅ Database: `weedx` (user: `weedx_user`, password: `weedx_pass_2024`)
-
-## ✅ Done - Android
-- Dependencies: Retrofit, Hilt/KSP, Firebase, Coroutines, Room, Coil
-- Data layer: `data/api/`, `data/models/`, `data/repositories/`
-- DI modules: Network, App, API, Repository
-- Auth: API service, repository, ViewModel, interceptor
-- ViewBinding enabled
-- Docs: README, architecture, use cases, API endpoints
-- Constants.kt updated with backend URL
-
-## ⚠️ Pending - Android Integration
-- 7 API services: Dashboard, WeedLogs, Monitoring, Environment, Reports, Gallery, Assistant, Profile
-- 8 repositories (same list)
-- 8 ViewModels (same list)
-- Activity integration: `@AndroidEntryPoint`, inject ViewModels, collect StateFlow, add Loading/Success/Error UI
-- Test endpoints with real backend
-- Configure real `google-services.json` for Firebase
-
----
-
-# 🎯 **Next Steps**
-
-## Phase 1: Test Backend Connection
-1. Test login from Android app with backend at `http://192.168.1.8/weedx-backend/`
-2. Verify JWT token generation and storage
-3. Test authenticated endpoint (e.g., `/robot/status`)
-
-## Phase 2: Build API Services (Priority Order)
-1. **DashboardApiService** - `/dashboard/stats`, `/dashboard/recent-activity`
-2. **RobotApiService** - `/robot/status`, `/robot/sessions`, `/robot/activity-log`
-3. **WeedLogsApiService** - `/weed-logs/recent`, `/weed-logs/details/{id}`
-4. **MonitoringApiService** - `/monitoring/sensors`, `/monitoring/alerts`
-5. **EnvironmentApiService** - `/environment/soil`, `/environment/weather`
-6. **ReportsApiService** - `/reports/list`, `/reports/generate`
-7. **GalleryApiService** - `/gallery/list`, `/gallery/upload`
-8. **ProfileApiService** - `/profile/view`, `/profile/update`
-
-## Phase 3: Each Module Pattern
-1. Create API service interface
-2. Implement Repository
-3. Build ViewModel with StateFlow
-4. Update Activity with `@AndroidEntryPoint`
-5. Collect StateFlow, handle Loading/Success/Error states
-6. Test with real backend data
-
----
-
-# 📱 **Mobile App Architecture (Kotlin + PHP + Firebase)**
-
-The app is a **dashboard-only** client for the Precision Farming Robot.
-It shows robot status, weed detections, logs, and reports.
-It does **not** send any control commands.
-
-## ⚙ Overview
+## Project Structure
 
 ```
-Robot → MQTT → PHP Backend → MySQL → Android App (REST API)
-                           ↑
-                     Firebase Auth + FCM
+app/src/main/java/com/example/weedx/
+├── data/
+│   ├── api/           # Retrofit interfaces (e.g., DashboardApiService.kt)
+│   ├── models/
+│   │   ├── request/   # POST body DTOs
+│   │   └── response/  # API response data classes
+│   └── repositories/  # Single source of truth, wraps API calls
+├── di/                # Hilt modules: NetworkModule, ApiModule, RepositoryModule
+├── presentation/
+│   └── viewmodels/    # StateFlow-based ViewModels
+├── utils/             # Constants.kt, NetworkResult.kt
+└── *.kt               # Activities (DashboardActivity, etc.) + Adapters
+
+xampp/htdocs/backend/  # PHP REST API (deployed to Pi)
+├── api/               # Endpoint handlers by feature (auth/, landing.php, monitoring/, etc.)
+├── config/            # database.php
+├── utils/             # response.php, auth.php, logger.php
+└── database/          # Schema and migrations
 ```
 
----
+## Critical Patterns
 
-# 🧩 **Components**
+### API Service → Repository → ViewModel → Activity
 
-### **Robot (Raspberry Pi + ROS2)**
+1. **API Service** (`data/api/`): Retrofit interface returning `Response<ApiResponse<T>>`
+   ```kotlin
+   @GET("landing")
+   suspend fun getDashboard(): Response<ApiResponse<DashboardResponse>>
+   ```
 
-* Publishes telemetry, sensor data, weed detections → MQTT
-* Sends logs/session details
+2. **Repository** (`data/repositories/`): Returns `NetworkResult<T>`, handles errors
+   ```kotlin
+   suspend fun getDashboard(): NetworkResult<DashboardResponse> {
+       return try {
+           val response = apiService.getDashboard()
+           if (response.isSuccessful && response.body()?.success == true) {
+               NetworkResult.Success(response.body()!!.data!!)
+           } else { NetworkResult.Error(response.body()?.message ?: "Error") }
+       } catch (e: Exception) { NetworkResult.Error(e.message ?: "Unknown error") }
+   }
+   ```
 
-### **MQTT Broker (Mosquitto)**
+3. **ViewModel** (`presentation/viewmodels/`): Sealed class states, StateFlow
+   ```kotlin
+   @HiltViewModel
+   class DashboardViewModel @Inject constructor(private val repo: DashboardRepository) : ViewModel() {
+       private val _state = MutableStateFlow<DashboardState>(DashboardState.Idle)
+       val state: StateFlow<DashboardState> = _state
+       
+       sealed class DashboardState {
+           object Idle : DashboardState()
+           object Loading : DashboardState()
+           data class Success(val data: DashboardResponse) : DashboardState()
+           data class Error(val message: String) : DashboardState()
+       }
+   }
+   ```
 
-* Robot publishes all data here
-* No direct Android connection
+4. **Activity**: `@AndroidEntryPoint`, `by viewModels()`, collect StateFlow in `lifecycleScope`
 
-### **PHP Backend** ✅ DEPLOYED
+### API Response Wrapper
 
-* **Location**: `/srv/http/weedx-backend/` on Arch Linux
-* **URL**: `http://192.168.1.8/weedx-backend/`
-* **Database**: MariaDB `weedx` (12 tables with sample data)
-* **Authentication**: JWT with bcrypt password hashing
-* MQTT subscriber ready at `mqtt/subscriber.php` (to be configured)
-* Provides 50+ REST APIs:
-  * `/auth/login`, `/auth/register`, `/auth/logout`
-  * `/dashboard/stats`, `/dashboard/recent-activity`
-  * `/robot/status`, `/robot/sessions`, `/robot/activity-log`
-  * `/weed-logs/*`, `/monitoring/*`, `/environment/*`
-  * `/reports/*`, `/gallery/*`, `/profile/*`
-* FCM notification structure ready (needs Firebase config)
+All backend responses use: `ApiResponse<T>(success: Boolean, message: String?, data: T?)`
 
-### **MySQL**
+### Hilt DI Wiring
 
-* Stores all telemetry, logs, detections, reports
+- `NetworkModule`: Provides OkHttpClient, Retrofit, AuthInterceptor
+- `ApiModule`: Provides all `*ApiService` interfaces
+- `RepositoryModule`: Binds repositories
 
-### **Android App (Kotlin)**
+## Key Files
 
-* Jetpack Compose + MVVM
-* Firebase Auth for login
-* Retrofit for PHP APIs
-* FCM for push notifications
-* Shows:
+| Purpose | File |
+|---------|------|
+| Backend URL | `utils/Constants.kt` - `BASE_URL` |
+| Auth token storage | SharedPreferences via `AuthInterceptor.kt` |
+| Network wrapper | `utils/NetworkResult.kt` - sealed class |
+| Example Activity | `DashboardActivity.kt` - full MVVM pattern |
+| Example ViewModel | `presentation/viewmodels/DashboardViewModel.kt` |
+| Backend endpoints | `xampp/htdocs/backend/api/` |
 
-  * dashboard
-  * weed detections
-  * logs
-  * reports
+## Commands
 
----
+```bash
+# Build Android
+./gradlew assembleDebug
 
-# 🛠 **Tech Stack**
+# Test backend endpoints (from project root)
+./scripts/test-backend.sh http://raspberrypi.mullet-bull.ts.net/weedx-backend
 
-**Android:** Kotlin, Jetpack Compose, MVVM, Retrofit, Firebase Auth, FCM
-**Backend:** PHP, MySQL, MQTT subscriber
-**Robot:** ROS2, Python, MQTT
-
----
-
-# 🎯 **Key Points**
-
-* App is **read-only**
-* No robot control
-* No multi-language support
-* Near real-time updates via REST polling
-* Firebase = auth + notifications only
-
----
-
-# 📂 **Code Organization (Android)**
-
-```
-data/
-  - api/
-  - repositories/
-  - models/
-
-domain/
-  - usecases/
-
-presentation/
-  - screens/
-  - viewmodels/
+# Deploy backend to Pi
+./scripts/deploy-to-pi.sh
 ```
 
-**Practices:**
+## Backend API Structure
 
-* Repository pattern
-* StateFlow for UI state
-* Coroutines for async
-* DI (Hilt/Koin recommended)
-* Clean, pure, reusable Composables
+PHP endpoints follow pattern: `api/{feature}/{action}.php`
+- Auth: `/auth/login`, `/auth/register`
+- Dashboard: `/landing`, `/robot/status`, `/alerts/recent`
+- Features: `/monitoring/*`, `/weed-logs/*`, `/environment/*`, `/reports/*`, `/gallery/*`, `/profile/*`
 
----
+Each endpoint uses `utils/response.php` → `Response::success($data)` or `Response::error($msg, $code)`
 
-# 💻 **Coding Standards**
+## Conventions
 
-* Consistent Loading / Success / Error states
-* Use Material 3
-* Keep UI state in ViewModels
-* Avoid logic inside Composables
-* Ask for clarification before implementing unclear features
+- **State pattern**: Always use `Idle → Loading → Success/Error` for async operations
+- **ViewModels**: Don't auto-load in `init{}` - let Activity call `loadData()` explicitly
+- **Images**: Use `Constants.getFullImageUrl(path)` to resolve relative paths
+- **Errors**: Catch exceptions at Repository level, return `NetworkResult.Error`
+- **UI updates**: Collect StateFlow in `lifecycleScope.launch {}` blocks
 
+## Docs to Maintain
+
+Only maintain: `docs/` and `xampp/htdocs/backend/` directories

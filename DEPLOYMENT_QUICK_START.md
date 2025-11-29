@@ -1,4 +1,4 @@
-# WeedX Backend - Tailscale Deployment Quick Start
+ WeedX Backend - Tailscale Deployment Quick Start
 
 Deploy WeedX backend to Raspberry Pi via Tailscale network.
 
