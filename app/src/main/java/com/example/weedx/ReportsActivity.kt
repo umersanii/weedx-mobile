@@ -1,10 +1,14 @@
 package com.example.weedx
 
+import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,6 +16,8 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Base64
 import android.view.View
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -255,64 +261,139 @@ class ReportsActivity : AppCompatActivity() {
 
     private fun setupDownloadButton() {
         downloadButton.setOnClickListener {
-            viewModel.exportReport("csv")
+            showExportFormatDialog()
         }
+    }
+
+    private fun showExportFormatDialog() {
+        val formats = arrayOf("CSV (Spreadsheet)", "PDF (Document)")
+        AlertDialog.Builder(this)
+            .setTitle("Export Format")
+            .setItems(formats) { _, which ->
+                when (which) {
+                    0 -> viewModel.exportReport("csv")
+                    1 -> viewModel.exportReport("pdf")
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun downloadReport(downloadUrl: String, filename: String) {
         try {
-            // Check if it's a data URI (base64 encoded)
-            if (downloadUrl.startsWith("data:text/csv;base64,")) {
-                val base64Data = downloadUrl.substring("data:text/csv;base64,".length)
-                val decodedBytes = Base64.decode(base64Data, Base64.DEFAULT)
-                
-                // Use MediaStore for Android 10+ (API 29+)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    val resolver = contentResolver
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                        put(MediaStore.MediaColumns.MIME_TYPE, "text/csv")
-                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+            // Determine MIME type and data prefix based on file extension
+            when {
+                filename.endsWith(".csv") -> {
+                    // Handle CSV download
+                    if (downloadUrl.startsWith("data:text/csv;base64,")) {
+                        val base64Data = downloadUrl.substring("data:text/csv;base64,".length)
+                        val decodedBytes = Base64.decode(base64Data, Base64.DEFAULT)
+                        saveFileToDownloads(decodedBytes, filename, "text/csv")
+                    } else {
+                        downloadWithDownloadManager(downloadUrl, filename, "text/csv")
                     }
-                    
-                    val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-                    uri?.let {
-                        resolver.openOutputStream(it)?.use { outputStream ->
-                            outputStream.write(decodedBytes)
-                        }
-                        Toast.makeText(this, "Report saved to Downloads/$filename", Toast.LENGTH_LONG).show()
-                    } ?: run {
-                        Toast.makeText(this, "Failed to create file", Toast.LENGTH_LONG).show()
-                    }
-                } else {
-                    // For Android 9 and below
-                    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    if (!downloadsDir.exists()) {
-                        downloadsDir.mkdirs()
-                    }
-                    val file = File(downloadsDir, filename)
-                    
-                    FileOutputStream(file).use { outputStream ->
-                        outputStream.write(decodedBytes)
-                    }
-                    Toast.makeText(this, "Report saved to Downloads/$filename", Toast.LENGTH_LONG).show()
                 }
-            } else {
-                // Handle regular URL download
-                val request = DownloadManager.Request(Uri.parse(downloadUrl))
-                    .setTitle("WeedX Report")
-                    .setDescription("Downloading report...")
-                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename)
-                
-                val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                downloadManager.enqueue(request)
-                
-                Toast.makeText(this, "Downloading report...", Toast.LENGTH_SHORT).show()
+                filename.endsWith(".pdf") -> {
+                    // Handle PDF generation from HTML
+                    if (downloadUrl.startsWith("data:text/html;base64,")) {
+                        val base64Data = downloadUrl.substring("data:text/html;base64,".length)
+                        val htmlContent = String(Base64.decode(base64Data, Base64.DEFAULT))
+                        convertHtmlToPdf(htmlContent, filename)
+                    } else if (downloadUrl.startsWith("data:application/pdf;base64,")) {
+                        val base64Data = downloadUrl.substring("data:application/pdf;base64,".length)
+                        val decodedBytes = Base64.decode(base64Data, Base64.DEFAULT)
+                        saveFileToDownloads(decodedBytes, filename, "application/pdf")
+                    } else {
+                        downloadWithDownloadManager(downloadUrl, filename, "application/pdf")
+                    }
+                }
+                else -> {
+                    Toast.makeText(this, "Unsupported file format", Toast.LENGTH_SHORT).show()
+                }
             }
         } catch (e: Exception) {
             Toast.makeText(this, "Failed to download: ${e.message}", Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun saveFileToDownloads(data: ByteArray, filename: String, mimeType: String) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val resolver = contentResolver
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                    put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                }
+                
+                val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                uri?.let {
+                    resolver.openOutputStream(it)?.use { outputStream ->
+                        outputStream.write(data)
+                    }
+                    Toast.makeText(this, "Report saved to Downloads/$filename", Toast.LENGTH_LONG).show()
+                } ?: run {
+                    Toast.makeText(this, "Failed to create file", Toast.LENGTH_LONG).show()
+                }
+            } else {
+                val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                if (!downloadsDir.exists()) {
+                    downloadsDir.mkdirs()
+                }
+                val file = File(downloadsDir, filename)
+                FileOutputStream(file).use { it.write(data) }
+                Toast.makeText(this, "Report saved to Downloads/$filename", Toast.LENGTH_LONG).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to save file: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun downloadWithDownloadManager(url: String, filename: String, mimeType: String) {
+        val request = DownloadManager.Request(Uri.parse(url))
+            .setTitle("WeedX Report")
+            .setDescription("Downloading report...")
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename)
+            .setMimeType(mimeType)
+        
+        val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager.enqueue(request)
+        Toast.makeText(this, "Downloading report...", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun convertHtmlToPdf(htmlContent: String, filename: String) {
+        val webView = WebView(this)
+        webView.settings.javaScriptEnabled = false
+        
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    webView.createPrintDocumentAdapter(filename)?.let { adapter ->
+                        // Create PDF using print adapter
+                        val pdfDocument = PdfDocument()
+                        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 size
+                        val page = pdfDocument.startPage(pageInfo)
+                        
+                        webView.draw(page.canvas)
+                        pdfDocument.finishPage(page)
+                        
+                        // Save to file
+                        try {
+                            val pdfBytes = java.io.ByteArrayOutputStream()
+                            pdfDocument.writeTo(pdfBytes)
+                            pdfDocument.close()
+                            
+                            saveFileToDownloads(pdfBytes.toByteArray(), filename, "application/pdf")
+                        } catch (e: Exception) {
+                            Toast.makeText(this@ReportsActivity, "PDF generation failed: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+        }
+        
+        webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
     }
 
     private fun setupBottomNavigation() {
