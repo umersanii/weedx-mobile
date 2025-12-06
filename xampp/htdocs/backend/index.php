@@ -69,6 +69,10 @@ switch (true) {
         require __DIR__ . '/api/alerts/recent.php';
         break;
     
+    case $request === 'alerts/all' && $method === 'GET':
+        require __DIR__ . '/api/alerts/all.php';
+        break;
+    
     case $request === 'alerts/create' && $method === 'POST':
         require __DIR__ . '/api/alerts/create.php';
         break;
