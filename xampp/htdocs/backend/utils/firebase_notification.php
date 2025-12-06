@@ -51,6 +51,12 @@ class FirebaseNotificationService {
      */
     public function sendToUser($userId, $title, $body, $data = []) {
         try {
+            // Check if user has notifications enabled
+            if (!$this->areNotificationsEnabled($userId)) {
+                error_log("Notifications disabled for user {$userId} - skipping notification");
+                return false;
+            }
+            
             // Get user's FCM token(s) from database
             $tokens = $this->getUserTokens($userId);
             
@@ -150,6 +156,38 @@ class FirebaseNotificationService {
         ];
         
         return $this->sendToUser($userId, $title, $message, $data);
+    }
+    
+    /**
+     * Check if user has notifications enabled in settings
+     * 
+     * @param int $userId User ID
+     * @return bool True if notifications are enabled, false otherwise
+     */
+    private function areNotificationsEnabled($userId) {
+        try {
+            $query = "SELECT notifications_enabled FROM user_settings 
+                     WHERE user_id = :user_id";
+            
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // If no settings record exists, default to enabled (true)
+            if (!$result) {
+                error_log("No user_settings found for user {$userId} - defaulting to notifications enabled");
+                return true;
+            }
+            
+            return (bool)$result['notifications_enabled'];
+            
+        } catch (Exception $e) {
+            error_log("Error checking notification settings for user {$userId}: " . $e->getMessage());
+            // Default to enabled on error to avoid blocking notifications
+            return true;
+        }
     }
     
     /**
