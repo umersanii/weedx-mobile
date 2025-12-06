@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -46,7 +45,7 @@ class ImageGalleryActivity : AppCompatActivity() {
     private lateinit var endDateCard: CardView
     private lateinit var startDateText: TextView
     private lateinit var endDateText: TextView
-    private lateinit var clearFilterButton: ImageView
+    private lateinit var clearFilterButton: CardView
     
     // Date filter state
     private var startDate: Calendar? = null
@@ -171,8 +170,8 @@ class ImageGalleryActivity : AppCompatActivity() {
     private fun clearDateFilter() {
         startDate = null
         endDate = null
-        startDateText.text = "Select Date"
-        endDateText.text = "Select Date"
+        startDateText.text = "Select"
+        endDateText.text = "Select"
         updateClearButtonVisibility()
         viewModel.loadGalleryImages()
     }

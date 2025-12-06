@@ -213,6 +213,15 @@ class DashboardActivity : AppCompatActivity() {
             // Update quick card for robot status
             robotStatusQuickValue.text = data.robotStatus.status.ifEmpty { "--" }
             
+            // Update live card color based on robot status
+            val isActive = data.robotStatus.status.equals("active", ignoreCase = true)
+            val cardColor = if (isActive) {
+                getColor(R.color.green_primary)
+            } else {
+                getColor(R.color.gray_text)
+            }
+            liveCard.setCardBackgroundColor(cardColor)
+            
             // Update today's summary
             weedsDetectedValue.text = if (data.todaySummary.weedsDetected >= 0) data.todaySummary.weedsDetected.toString() else "--"
             totalWeedsValue.text = if (data.todaySummary.weedsDetected >= 0) data.todaySummary.weedsDetected.toString() else "--"
@@ -234,6 +243,9 @@ class DashboardActivity : AppCompatActivity() {
         totalWeedsValue.text = "--"
         robotStatusQuickValue.text = "--"
         weatherTempValue.text = "--°C"
+        
+        // Reset live card to inactive state
+        liveCard.setCardBackgroundColor(getColor(R.color.gray_text))
     }
     
     private fun updateWeatherUI(weather: com.example.weedx.data.models.response.CurrentWeather) {
