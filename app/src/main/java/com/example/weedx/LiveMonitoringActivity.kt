@@ -1,6 +1,8 @@
 package com.example.weedx
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -33,7 +35,18 @@ class LiveMonitoringActivity : AppCompatActivity() {
     private lateinit var coverageValue: TextView
     private lateinit var efficiencyValue: TextView
     private lateinit var swipeRefresh: SwipeRefreshLayout
+    private lateinit var lastUpdatedText: TextView
     private val timelineEvents = mutableListOf<TimelineEvent>()
+    
+    // Auto-refresh handler
+    private val refreshHandler = Handler(Looper.getMainLooper())
+    private val refreshInterval = 60000L // 60 seconds (1 minute)
+    private val refreshRunnable = object : Runnable {
+        override fun run() {
+            viewModel.refresh()
+            refreshHandler.postDelayed(this, refreshInterval)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,9 +69,40 @@ class LiveMonitoringActivity : AppCompatActivity() {
         herbicideValue = findViewById(R.id.herbicideValue)
         coverageValue = findViewById(R.id.coverageValue)
         efficiencyValue = findViewById(R.id.efficiencyValue)
+        lastUpdatedText = findViewById(R.id.lastUpdatedText)
 
         setupTimeline()
         observeViewModel()
+        startAutoRefresh()
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Resume auto-refresh when activity is visible
+        startAutoRefresh()
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Stop auto-refresh when activity is not visible
+        stopAutoRefresh()
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clean up handler callbacks
+        stopAutoRefresh()
+    }
+    
+    private fun startAutoRefresh() {
+        // Start periodic refresh
+        refreshHandler.removeCallbacks(refreshRunnable)
+        refreshHandler.post(refreshRunnable)
+    }
+    
+    private fun stopAutoRefresh() {
+        // Stop periodic refresh
+        refreshHandler.removeCallbacks(refreshRunnable)
     }
 
     private fun setupTimeline() {
@@ -103,10 +147,11 @@ class LiveMonitoringActivity : AppCompatActivity() {
                         // Initial state
                     }
                     is MonitoringViewModel.MonitoringState.Loading -> {
-                        // Show loading state
+                        // Show loading state (optional - could show a small indicator)
                     }
                     is MonitoringViewModel.MonitoringState.Success -> {
                         updateUI(state.data)
+                        updateLastRefreshTime()
                     }
                     is MonitoringViewModel.MonitoringState.Error -> {
                         Toast.makeText(
@@ -118,6 +163,11 @@ class LiveMonitoringActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+    
+    private fun updateLastRefreshTime() {
+        val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+        lastUpdatedText.text = "Last updated: $currentTime"
     }
     
     private fun updateUI(data: com.example.weedx.data.models.response.MonitoringResponse) {

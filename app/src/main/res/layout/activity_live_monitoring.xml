@@ -39,6 +39,17 @@
                 android:text="@string/real_time_robot_activity"
                 android:textSize="14sp"
                 android:textColor="@color/gray_text" />
+            
+            <!-- Last Updated Text -->
+            <TextView
+                android:id="@+id/lastUpdatedText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Last updated: --:--:--"
+                android:textSize="12sp"
+                android:textColor="@color/gray_text"
+                android:fontFamily="sans-serif" />
 
             <!-- Robot Active Card -->
             <androidx.cardview.widget.CardView
