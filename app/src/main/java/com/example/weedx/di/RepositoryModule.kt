@@ -101,4 +101,12 @@ object RepositoryModule {
     ): FcmTokenRepository {
         return FcmTokenRepository(fcmTokenApiService, context)
     }
+    
+    @Provides
+    @Singleton
+    fun provideAlertsRepository(
+        alertsApiService: AlertsApiService
+    ): AlertsRepository {
+        return AlertsRepository(alertsApiService)
+    }
 }

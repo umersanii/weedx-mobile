@@ -74,4 +74,10 @@ object ApiModule {
     fun provideFcmTokenApiService(retrofit: Retrofit): FcmTokenApiService {
         return retrofit.create(FcmTokenApiService::class.java)
     }
+    
+    @Provides
+    @Singleton
+    fun provideAlertsApiService(retrofit: Retrofit): AlertsApiService {
+        return retrofit.create(AlertsApiService::class.java)
+    }
 }

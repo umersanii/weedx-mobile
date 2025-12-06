@@ -180,8 +180,8 @@ class ProfileActivity : AppCompatActivity() {
         }
         
         notificationsItem.setOnClickListener {
-            Toast.makeText(this, "Notifications", Toast.LENGTH_SHORT).show()
-            // TODO: Navigate to Notifications screen
+            val intent = Intent(this, NotificationsActivity::class.java)
+            startActivity(intent)
         }
 
         appSettingsItem.setOnClickListener {
