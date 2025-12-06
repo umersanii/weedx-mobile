@@ -1,12 +1,15 @@
 package com.example.weedx
 
 import android.app.DownloadManager
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Base64
 import android.view.View
 import android.widget.ProgressBar
@@ -33,6 +36,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
+import java.io.OutputStream
 
 @AndroidEntryPoint
 class ReportsActivity : AppCompatActivity() {
@@ -262,9 +266,26 @@ class ReportsActivity : AppCompatActivity() {
                 val base64Data = downloadUrl.substring("data:text/csv;base64,".length)
                 val decodedBytes = Base64.decode(base64Data, Base64.DEFAULT)
                 
-                // For Android 10+ (API 29+), use MediaStore or Downloads directory
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                    // Use scoped storage for Android 10+
+                // Use MediaStore for Android 10+ (API 29+)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val resolver = contentResolver
+                    val contentValues = ContentValues().apply {
+                        put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                        put(MediaStore.MediaColumns.MIME_TYPE, "text/csv")
+                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                    }
+                    
+                    val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                    uri?.let {
+                        resolver.openOutputStream(it)?.use { outputStream ->
+                            outputStream.write(decodedBytes)
+                        }
+                        Toast.makeText(this, "Report saved to Downloads/$filename", Toast.LENGTH_LONG).show()
+                    } ?: run {
+                        Toast.makeText(this, "Failed to create file", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    // For Android 9 and below
                     val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                     if (!downloadsDir.exists()) {
                         downloadsDir.mkdirs()
@@ -274,17 +295,8 @@ class ReportsActivity : AppCompatActivity() {
                     FileOutputStream(file).use { outputStream ->
                         outputStream.write(decodedBytes)
                     }
-                } else {
-                    // For older versions
-                    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    val file = File(downloadsDir, filename)
-                    
-                    FileOutputStream(file).use { outputStream ->
-                        outputStream.write(decodedBytes)
-                    }
+                    Toast.makeText(this, "Report saved to Downloads/$filename", Toast.LENGTH_LONG).show()
                 }
-                
-                Toast.makeText(this, "Report saved to Downloads/$filename", Toast.LENGTH_LONG).show()
             } else {
                 // Handle regular URL download
                 val request = DownloadManager.Request(Uri.parse(downloadUrl))
