@@ -64,11 +64,6 @@ Logger::logAuth('/api/auth/login', $user['id'], true);
 Logger::logSuccess('/api/auth/login', 'User logged in: ' . $user['email']);
 Response::success([
     'token' => $token,
-    'user' => [
-        'id' => $user['id'],
-        'name' => $user['name'],
-        'email' => $user['email'],
-        'avatar' => $user['avatar'],
-        'created_at' => $user['created_at']
-    ]
+    'userId' => (string)$user['id'],
+    'email' => $user['email']
 ], 'Login successful');

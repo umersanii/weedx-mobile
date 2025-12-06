@@ -21,18 +21,26 @@ try {
     $summaryQuery = "
         SELECT weed_type, COUNT(*) as count 
         FROM weed_detections 
+        WHERE user_id = :user_id
         GROUP BY weed_type
         ORDER BY count DESC
     ";
-    $summary = $db->query($summaryQuery)->fetchAll();
+    $summaryStmt = $db->prepare($summaryQuery);
+    $summaryStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $summaryStmt->execute();
+    $summary = $summaryStmt->fetchAll();
     
     // Get recent detections
     $detectionsQuery = "
         SELECT * FROM weed_detections 
+        WHERE user_id = :user_id
         ORDER BY detected_at DESC 
         LIMIT 50
     ";
-    $detections = $db->query($detectionsQuery)->fetchAll();
+    $detectionsStmt = $db->prepare($detectionsQuery);
+    $detectionsStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $detectionsStmt->execute();
+    $detections = $detectionsStmt->fetchAll();
     
     $response = [
         'summary' => array_map(function($item) {

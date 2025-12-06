@@ -1,6 +1,27 @@
 # WeedX - Copilot Instructions
 
 > Keep responses short and concise, yet complete.
+> This VS CODE Instance is running on the raspberry pi hosting the backend.
+
+## ⚠️ CRITICAL: Backend File Locations
+
+**Development Location** (where you edit):
+- Path: `/home/umersani/weedx-mobile/xampp/htdocs/backend/`
+- This is the source code in the Git repository
+- Make ALL changes here
+
+**Production Location** (where Apache serves from):
+- Path: `/var/www/html/weedx-backend/`
+- This is where the live backend runs
+- **NEVER edit files here directly**
+
+**Deployment Workflow**:
+1. Edit files in `xampp/htdocs/backend/`
+2. Run deployment script: `bash scripts/deploy-backend.sh`
+3. Or manually copy: `sudo cp -r xampp/htdocs/backend/* /var/www/html/weedx-backend/`
+4. Restart Apache: `sudo systemctl restart apache2`
+
+**Always deploy after making backend changes!**
 
 ## Architecture Overview
 
@@ -27,11 +48,14 @@ app/src/main/java/com/example/weedx/
 ├── utils/             # Constants.kt, NetworkResult.kt
 └── *.kt               # Activities (DashboardActivity, etc.) + Adapters
 
-xampp/htdocs/backend/  # PHP REST API (deployed to Pi)
+xampp/htdocs/backend/  # PHP REST API source code (Git repo)
 ├── api/               # Endpoint handlers by feature (auth/, landing.php, monitoring/, etc.)
 ├── config/            # database.php
 ├── utils/             # response.php, auth.php, logger.php
 └── database/          # Schema and migrations
+
+/var/www/html/weedx-backend/  # DEPLOYED backend (Apache serves from here)
+└── (Same structure as above - deployed via scripts/deploy-backend.sh)
 ```
 
 ## Critical Patterns
@@ -93,7 +117,8 @@ All backend responses use: `ApiResponse<T>(success: Boolean, message: String?, d
 | Network wrapper | `utils/NetworkResult.kt` - sealed class |
 | Example Activity | `DashboardActivity.kt` - full MVVM pattern |
 | Example ViewModel | `presentation/viewmodels/DashboardViewModel.kt` |
-| Backend endpoints | `xampp/htdocs/backend/api/` |
+| Backend source | `xampp/htdocs/backend/api/` (edit here) |
+| Backend production | `/var/www/html/weedx-backend/api/` (deployed here) |
 
 ## Commands
 
@@ -104,7 +129,11 @@ All backend responses use: `ApiResponse<T>(success: Boolean, message: String?, d
 # Test backend endpoints (from project root)
 ./scripts/test-backend.sh http://raspberrypi.mullet-bull.ts.net/weedx-backend
 
-# Deploy backend to Pi
+# Deploy backend changes to production (REQUIRED after backend edits)
+bash scripts/deploy-backend.sh
+# Or manual: sudo cp -r xampp/htdocs/backend/* /var/www/html/weedx-backend/
+
+# Deploy to remote Pi (if not running on Pi)
 ./scripts/deploy-to-pi.sh
 ```
 
@@ -116,6 +145,12 @@ PHP endpoints follow pattern: `api/{feature}/{action}.php`
 - Features: `/monitoring/*`, `/weed-logs/*`, `/environment/*`, `/reports/*`, `/gallery/*`, `/profile/*`
 
 Each endpoint uses `utils/response.php` → `Response::success($data)` or `Response::error($msg, $code)`
+
+**Security - User Data Isolation**:
+- All endpoints that query `weed_detections` table MUST filter by `user_id`
+- Extract user ID from JWT: `$tokenData = Auth::validateToken();` → `$tokenData['userId']`
+- Add to queries: `WHERE user_id = :user_id` with `$stmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT)`
+- This ensures users only see their own data (gallery, reports, logs, etc.)
 
 ## Conventions
 

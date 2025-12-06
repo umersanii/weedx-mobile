@@ -23,23 +23,25 @@ if (!$imageId) {
 }
 
 try {
-    // Get image path first
-    $selectQuery = "SELECT image_path FROM weed_detections WHERE id = :id LIMIT 1";
+    // Get image path first (with user authorization)
+    $selectQuery = "SELECT image_path FROM weed_detections WHERE id = :id AND user_id = :user_id LIMIT 1";
     $selectStmt = $db->prepare($selectQuery);
     $selectStmt->bindParam(':id', $imageId, PDO::PARAM_INT);
+    $selectStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
     $selectStmt->execute();
     
     $image = $selectStmt->fetch();
     
     if (!$image) {
-        Logger::logError('/api/gallery/' . $imageId, 'Image not found', 404);
-        Response::error('Image not found', 404);
+        Logger::logError('/api/gallery/' . $imageId, 'Image not found or unauthorized', 404);
+        Response::error('Image not found or unauthorized', 404);
     }
     
-    // Delete from database
-    $deleteQuery = "DELETE FROM weed_detections WHERE id = :id";
+    // Delete from database (with user authorization)
+    $deleteQuery = "DELETE FROM weed_detections WHERE id = :id AND user_id = :user_id";
     $deleteStmt = $db->prepare($deleteQuery);
     $deleteStmt->bindParam(':id', $imageId, PDO::PARAM_INT);
+    $deleteStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
     
     if ($deleteStmt->execute()) {
         // Delete physical file

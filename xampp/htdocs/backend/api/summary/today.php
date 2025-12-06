@@ -21,8 +21,10 @@ $db = $database->getConnection();
 
 try {
     // Weeds detected today
-    $weedsQuery = "SELECT COUNT(*) as count FROM weed_detections WHERE DATE(detected_at) = CURDATE()";
-    $weedsStmt = $db->query($weedsQuery);
+    $weedsQuery = "SELECT COUNT(*) as count FROM weed_detections WHERE user_id = :user_id AND DATE(detected_at) = CURDATE()";
+    $weedsStmt = $db->prepare($weedsQuery);
+    $weedsStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $weedsStmt->execute();
     $weeds = $weedsStmt->fetch();
     
     // Area covered today

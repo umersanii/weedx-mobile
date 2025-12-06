@@ -22,15 +22,16 @@ try {
     $offset = $_GET['offset'] ?? 0;
     $weedType = $_GET['type'] ?? null;
     
-    $query = "SELECT * FROM weed_detections";
+    $query = "SELECT * FROM weed_detections WHERE user_id = :user_id";
     
     if ($weedType) {
-        $query .= " WHERE weed_type = :weed_type";
+        $query .= " AND weed_type = :weed_type";
     }
     
     $query .= " ORDER BY detected_at DESC LIMIT :limit OFFSET :offset";
     
     $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
     
     if ($weedType) {
         $stmt->bindParam(':weed_type', $weedType);

@@ -139,15 +139,28 @@ docs/
 The backend is running on Raspberry Pi and accessible via Tailscale network:
 
 - **Pi URL**: `http://raspberrypi.mullet-bull.ts.net/weedx-backend/` ✅ **LIVE**
-- **Status**: All 30+ API endpoints working
-- **Location**: `/var/www/html/weedx-backend/`
-- **Database**: MySQL with 12 tables and sample data
+- **Status**: All 30+ API endpoints working with user isolation
+- **Production Location**: `/var/www/html/weedx-backend/` (Apache serves from here)
+- **Source Location**: `xampp/htdocs/backend/` (edit files here, then deploy)
+- **Database**: MySQL with 12 tables and multi-user support
 
 Benefits:
 - ✅ Access backend from anywhere (no port forwarding)
-- ✅ Secure encrypted connection
+- ✅ Secure encrypted connection with JWT authentication
+- ✅ Per-user data isolation (users only see their own data)
 - ✅ Works on mobile/cellular networks
 - ✅ 24/7 availability on Raspberry Pi
+
+### Backend Development Workflow
+
+1. **Edit backend files** in `xampp/htdocs/backend/`
+2. **Deploy to production**:
+   ```bash
+   bash scripts/deploy-backend.sh
+   # Or manually: sudo cp -r xampp/htdocs/backend/* /var/www/html/weedx-backend/
+   ```
+3. **Restart Apache**: `sudo systemctl restart apache2`
+4. **Test changes** via app or API calls
 
 ---
 
@@ -195,7 +208,7 @@ See [gradle/libs.versions.toml](gradle/libs.versions.toml) for full list.
 - [ ] Location instead of RID in profile page
 - [ ] Soil conditions in the weather page
 - [ ] Image path in the gallery
-- [ ] Images not being specific to account
+
 
 
 
@@ -211,6 +224,8 @@ See [gradle/libs.versions.toml](gradle/libs.versions.toml) for full list.
 - [x] ✅ All 13 Activity screens created
 - [x] ✅ Complete data layer (9 API services + 9 repositories)
 - [x] ✅ All response models and request DTOs
+- [x] Images not being specific to account
+
 - [ ] 🔄 Build ViewModels for all modules
 - [ ] 🔄 Activity ↔ ViewModel integration
 - [ ] ⏳ End-to-end testing with real backend

@@ -18,8 +18,11 @@ $db = $database->getConnection();
 
 try {
     // Widgets
-    $totalWeedsQuery = "SELECT COUNT(*) as total FROM weed_detections";
-    $totalWeeds = $db->query($totalWeedsQuery)->fetch();
+    $totalWeedsQuery = "SELECT COUNT(*) as total FROM weed_detections WHERE user_id = :user_id";
+    $totalWeedsStmt = $db->prepare($totalWeedsQuery);
+    $totalWeedsStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $totalWeedsStmt->execute();
+    $totalWeeds = $totalWeedsStmt->fetch();
     
     $areaQuery = "SELECT COALESCE(SUM(area_covered), 0) as total FROM robot_sessions";
     $area = $db->query($areaQuery)->fetch();
@@ -31,20 +34,27 @@ try {
     $trendQuery = "
         SELECT DATE(detected_at) as date, COUNT(*) as count 
         FROM weed_detections 
-        WHERE detected_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        WHERE user_id = :user_id AND detected_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
         GROUP BY DATE(detected_at)
         ORDER BY date ASC
     ";
-    $trend = $db->query($trendQuery)->fetchAll();
+    $trendStmt = $db->prepare($trendQuery);
+    $trendStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $trendStmt->execute();
+    $trend = $trendStmt->fetchAll();
     
     // Weed distribution by crop
     $distributionQuery = "
         SELECT crop_type, weed_type, COUNT(*) as count 
         FROM weed_detections 
+        WHERE user_id = :user_id
         GROUP BY crop_type, weed_type
         ORDER BY crop_type, count DESC
     ";
-    $distribution = $db->query($distributionQuery)->fetchAll();
+    $distributionStmt = $db->prepare($distributionQuery);
+    $distributionStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $distributionStmt->execute();
+    $distribution = $distributionStmt->fetchAll();
     
     $response = [
         'widgets' => [

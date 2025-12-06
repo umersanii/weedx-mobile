@@ -17,8 +17,11 @@ $database = new Database();
 $db = $database->getConnection();
 
 try {
-    $totalWeedsQuery = "SELECT COUNT(*) as total FROM weed_detections";
-    $totalWeeds = $db->query($totalWeedsQuery)->fetch();
+    $totalWeedsQuery = "SELECT COUNT(*) as total FROM weed_detections WHERE user_id = :user_id";
+    $totalWeedsStmt = $db->prepare($totalWeedsQuery);
+    $totalWeedsStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $totalWeedsStmt->execute();
+    $totalWeeds = $totalWeedsStmt->fetch();
     
     $areaQuery = "SELECT COALESCE(SUM(area_covered), 0) as total FROM robot_sessions";
     $area = $db->query($areaQuery)->fetch();

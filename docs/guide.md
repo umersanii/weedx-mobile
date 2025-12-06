@@ -19,9 +19,34 @@ This document consolidates all guides for the WeedX project including backend se
 # Backend Summary
 
 **Status**: 🚀 **DEPLOYED & OPERATIONAL**  
-**Date**: November 28, 2025  
+**Date**: December 8, 2025  
 **URL**: `http://raspberrypi.mullet-bull.ts.net/weedx-backend/`  
-**Location**: `/var/www/html/weedx-backend/` on Raspberry Pi
+**Production Location**: `/var/www/html/weedx-backend/` (Apache serves from here)  
+**Source Location**: `/home/umersani/weedx-mobile/xampp/htdocs/backend/` (Git repository - edit here)
+
+## ⚠️ Development Workflow
+
+**CRITICAL**: Backend files exist in TWO locations:
+
+1. **Source/Development** (`xampp/htdocs/backend/`):
+   - This is the Git repository where you make all changes
+   - Edit all backend files here
+   
+2. **Production/Deployment** (`/var/www/html/weedx-backend/`):
+   - Apache serves the backend from this location
+   - **NEVER edit files here directly**
+   - Always deploy from source after changes
+
+**Deployment Steps**:
+```bash
+# Method 1: Use deploy script (recommended)
+bash scripts/deploy-backend.sh
+
+# Method 2: Manual deployment
+sudo cp -r xampp/htdocs/backend/* /var/www/html/weedx-backend/
+sudo chown -R www-data:www-data /var/www/html/weedx-backend/
+sudo systemctl restart apache2
+```
 
 ## What Was Built
 
@@ -30,9 +55,10 @@ A complete PHP REST API backend for the WeedX precision farming system with:
 ### Core Infrastructure
 - **Router**: `index.php` - Handles all API routing
 - **Database Config**: MySQL connection with PDO
-- **Authentication**: JWT token-based auth system
+- **Authentication**: JWT token-based auth system with user isolation
 - **Response Helper**: Standardized JSON responses
 - **CORS Support**: Cross-origin requests enabled
+- **Security**: User data isolation - users only see their own data
 
 ### API Endpoints (51+ endpoints)
 
@@ -65,29 +91,36 @@ A complete PHP REST API backend for the WeedX precision farming system with:
 
 ### Sample Data Included
 
-- Demo user: `admin@weedx.com` / `admin123`
+- Demo users (4 users with isolated data):
+  - User 1: `admin@weedx.com` / `admin123` (has weed detections)
+  - User 2: `test3@test.com` (no data)
+  - User 3: `sani@gmail.com` (no data)  
+  - User 4: `taha.awan2k3@gmail.com` (no data)
 - Robot status with 85% battery
-- 4 weed detections
+- 3 weed detections (all belonging to user 1)
 - 7-day weather forecast
 - Current soil data
 - 3 system alerts
 - Activity log entries
 
-## File Structure
+**Security Note**: All endpoints enforce user isolation - each user can only access their own weed detections, gallery images, and reports.
+
+## File Structure (Source Location)
 
 ```
-backend/
+xampp/htdocs/backend/            # Source code (edit here)
 ├── api/                          # 50+ endpoint handlers
-│   ├── auth/                    # 3 files
+│   ├── auth/                    # 3 files (login.php, register.php, logout.php)
 │   ├── robot/                   # 1 file
 │   ├── monitoring/              # 4 files
 │   ├── weed-logs/              # 3 files
 │   ├── environment/            # 5 files
 │   ├── reports/                # 5 files
-│   ├── gallery/                # 4 files
+│   ├── gallery/                # 4 files (list.php, view.php, delete.php, upload.php)
 │   ├── profile/                # 8 files
 │   ├── assistant/              # 2 files
-│   └── landing.php             # 1 file
+│   ├── summary/                # 1 file (today.php)
+│   └── landing.php             # Dashboard endpoint
 ├── config/
 │   ├── database.php            # MySQL connection
 │   └── firebase.php            # Firebase config
@@ -97,11 +130,15 @@ backend/
 │   └── subscriber.php          # MQTT listener
 ├── utils/
 │   ├── response.php            # Response helper
-│   ├── auth.php                # JWT authentication
-│   └── logger.php              # API logging
+│   ├── auth.php                # JWT authentication & validation
+│   ├── logger.php              # API logging
+│   └── image_helper.php        # Image URL helpers
 ├── logs/                        # API logs directory
 ├── .htaccess                    # Apache routing
 ├── index.php                    # Main router
+
+# After deployment, files are copied to:
+/var/www/html/weedx-backend/     # Production (Apache serves from here)
 └── README.md                   # Documentation
 ```
 
@@ -213,6 +250,11 @@ ssh pi@raspberrypi.mullet-bull.ts.net
 tailscale status
 sudo systemctl restart tailscaled
 ```
+### Restart Apache
+```bash
+sudo systemctl restart apache2
+```
+
 
 ### Backend returns 404
 

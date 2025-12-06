@@ -24,16 +24,17 @@ if (!$imageId) {
 }
 
 try {
-    $query = "SELECT * FROM weed_detections WHERE id = :id LIMIT 1";
+    $query = "SELECT * FROM weed_detections WHERE id = :id AND user_id = :user_id LIMIT 1";
     $stmt = $db->prepare($query);
     $stmt->bindParam(':id', $imageId, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
     $stmt->execute();
     
     $image = $stmt->fetch();
     
     if (!$image) {
-        Logger::logError('/api/gallery/' . $imageId, 'Image not found', 404);
-        Response::error('Image not found', 404);
+        Logger::logError('/api/gallery/' . $imageId, 'Image not found or unauthorized', 404);
+        Response::error('Image not found or unauthorized', 404);
     }
     
     // Determine image URL: prefer base64, fallback to file path

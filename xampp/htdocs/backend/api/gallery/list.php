@@ -26,19 +26,14 @@ try {
     // Get all detections (with or without images)
     $query = "
         SELECT id, weed_type, confidence, latitude, longitude, 
-               image_base64, image_mime_type, image_path, detected_at 
+               image_base64, image_mime_type, image_path, detected_at, crop_type 
         FROM weed_detections 
-        WHERE 1=1
+        WHERE user_id = :user_id
+        ORDER BY detected_at DESC LIMIT :limit OFFSET :offset
     ";
     
-    // Filter by user if user_id is provided
-    if ($userId) {
-        $query .= " AND (user_id = :user_id OR user_id IS NULL)";
-    }
-    
-    $query .= " ORDER BY detected_at DESC LIMIT :limit OFFSET :offset";
-    
     $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
     $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();

@@ -33,8 +33,11 @@ try {
             SUM(CASE WHEN DATE(detected_at) = CURDATE() THEN 1 ELSE 0 END) as today_weeds,
             ROUND(AVG(CASE WHEN DATE(detected_at) = CURDATE() THEN confidence ELSE NULL END), 2) as avg_confidence
         FROM weed_detections
+        WHERE user_id = :user_id
     ";
-    $summaryStmt = $db->query($summaryQuery);
+    $summaryStmt = $db->prepare($summaryQuery);
+    $summaryStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $summaryStmt->execute();
     $summary = $summaryStmt->fetch();
     
     // Get area covered and herbicide used today from robot_sessions
