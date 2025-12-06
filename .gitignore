@@ -162,6 +162,7 @@ config.properties
 # Firebase - SENSITIVE
 **/firebase_app_id.json
 **/firebase-debug.log
+**/firebase-service-account.json
 .firebase/
 
 # Environment files - SENSITIVE

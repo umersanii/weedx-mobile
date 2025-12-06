@@ -1,7 +1,7 @@
 -- Add FCM tokens table for push notifications
 CREATE TABLE IF NOT EXISTS fcm_tokens (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
     token VARCHAR(255) NOT NULL UNIQUE,
     device_info VARCHAR(255) DEFAULT NULL,
     active TINYINT(1) DEFAULT 1,
