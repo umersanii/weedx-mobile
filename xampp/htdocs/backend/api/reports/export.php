@@ -33,7 +33,7 @@ try {
             confidence,
             latitude,
             longitude,
-            treatment_action,
+            treated,
             detected_at
         FROM weed_detections 
         WHERE user_id = :user_id
@@ -46,7 +46,7 @@ try {
     $detections = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Generate CSV content
-    $csvData = "ID,Weed Type,Crop Type,Confidence,Latitude,Longitude,Treatment Action,Detected At\n";
+    $csvData = "ID,Weed Type,Crop Type,Confidence,Latitude,Longitude,Treated,Detected At\n";
     
     foreach ($detections as $detection) {
         $csvData .= sprintf(
@@ -57,7 +57,7 @@ try {
             $detection['confidence'] ?? 0,
             $detection['latitude'] ?? 0,
             $detection['longitude'] ?? 0,
-            $detection['treatment_action'] ?? 'None',
+            $detection['treated'] ? 'Yes' : 'No',
             $detection['detected_at'] ?? ''
         );
     }
