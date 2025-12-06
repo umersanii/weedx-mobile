@@ -24,6 +24,9 @@ require_once __DIR__ . '/utils/logger.php';
 $request = $_GET['request'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Remove 'api/' prefix if present
+$request = preg_replace('/^api\//', '', $request);
+
 // Log incoming request
 Logger::logRequest('/api/' . $request, $method);
 
@@ -188,6 +191,14 @@ switch (true) {
     
     case $request === 'profile/settings' && $method === 'PUT':
         require __DIR__ . '/api/profile/settings/update.php';
+        break;
+    
+    case $request === 'profile/fcm-token' && $method === 'POST':
+        require __DIR__ . '/api/profile/fcm-token.php';
+        break;
+    
+    case $request === 'profile/fcm-token' && $method === 'DELETE':
+        require __DIR__ . '/api/profile/fcm-token.php';
         break;
     
     // Assistant
