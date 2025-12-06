@@ -4,10 +4,10 @@
  * GET /api/weed-logs
  */
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../utils/response.php';
-require_once __DIR__ . '/../utils/auth.php';
-require_once __DIR__ . '/../utils/logger.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../utils/response.php';
+require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/logger.php';
 
 Logger::logRequest('/api/weed-logs', 'GET');
 
