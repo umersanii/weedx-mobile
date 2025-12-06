@@ -1,5 +1,6 @@
 package com.example.weedx.di
 
+import android.content.Context
 import android.content.SharedPreferences
 import com.example.weedx.data.api.*
 import com.example.weedx.data.repositories.*
@@ -7,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -89,5 +91,14 @@ object RepositoryModule {
         assistantApiService: AssistantApiService
     ): AssistantRepository {
         return AssistantRepository(assistantApiService)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideFcmTokenRepository(
+        fcmTokenApiService: FcmTokenApiService,
+        @ApplicationContext context: Context
+    ): FcmTokenRepository {
+        return FcmTokenRepository(fcmTokenApiService, context)
     }
 }

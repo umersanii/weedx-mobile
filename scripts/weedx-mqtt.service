@@ -1,0 +1,25 @@
+[Unit]
+Description=WeedX MQTT Subscriber Service
+After=network.target mosquitto.service mysql.service
+Requires=mosquitto.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/html/weedx-backend
+ExecStart=/usr/bin/php /var/www/html/weedx-backend/mqtt/subscriber.php
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment
+Environment="PATH=/usr/bin:/usr/local/bin"
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

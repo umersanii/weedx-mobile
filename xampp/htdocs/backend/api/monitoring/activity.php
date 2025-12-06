@@ -19,8 +19,9 @@ $db = $database->getConnection();
 try {
     $limit = $_GET['limit'] ?? 20;
     
-    $query = "SELECT * FROM robot_activity_log ORDER BY timestamp DESC LIMIT :limit";
+    $query = "SELECT * FROM robot_activity_log WHERE user_id = :user_id ORDER BY timestamp DESC LIMIT :limit";
     $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
     $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
     $stmt->execute();
     

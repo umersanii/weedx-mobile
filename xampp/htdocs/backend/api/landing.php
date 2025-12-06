@@ -47,9 +47,11 @@ try {
             COALESCE(SUM(herbicide_used), 0) as herbicide_used,
             COALESCE(SUM(TIMESTAMPDIFF(MINUTE, start_time, IFNULL(end_time, NOW()))), 0) as session_duration
         FROM robot_sessions 
-        WHERE DATE(start_time) = CURDATE()
+        WHERE user_id = :user_id AND DATE(start_time) = CURDATE()
     ";
-    $sessionStmt = $db->query($sessionQuery);
+    $sessionStmt = $db->prepare($sessionQuery);
+    $sessionStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $sessionStmt->execute();
     $sessionData = $sessionStmt->fetch();
     
     // Get recent alerts (last 5)

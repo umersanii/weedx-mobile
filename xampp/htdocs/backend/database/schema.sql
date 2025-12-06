@@ -83,6 +83,7 @@ CREATE TABLE robot_status (
 
 CREATE TABLE robot_sessions (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL COMMENT 'User who owns this session',
     start_time DATETIME NOT NULL,
     end_time DATETIME NULL,
     area_covered DECIMAL(10, 2) DEFAULT 0 COMMENT 'Area in hectares',
@@ -93,6 +94,8 @@ CREATE TABLE robot_sessions (
     status ENUM('active', 'completed', 'interrupted') DEFAULT 'active',
     notes TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
     INDEX idx_start_time (start_time),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -103,11 +106,14 @@ CREATE TABLE robot_sessions (
 
 CREATE TABLE robot_activity_log (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL COMMENT 'User who owns this activity',
     action VARCHAR(100) NOT NULL,
     description TEXT NULL,
     status ENUM('started', 'completed', 'failed') DEFAULT 'completed',
     metadata TEXT NULL COMMENT 'JSON data',
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
     INDEX idx_timestamp (timestamp),
     INDEX idx_action (action)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

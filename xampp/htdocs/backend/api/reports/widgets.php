@@ -23,11 +23,17 @@ try {
     $totalWeedsStmt->execute();
     $totalWeeds = $totalWeedsStmt->fetch();
     
-    $areaQuery = "SELECT COALESCE(SUM(area_covered), 0) as total FROM robot_sessions";
-    $area = $db->query($areaQuery)->fetch();
+    $areaQuery = "SELECT COALESCE(SUM(area_covered), 0) as total FROM robot_sessions WHERE user_id = :user_id";
+    $areaStmt = $db->prepare($areaQuery);
+    $areaStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $areaStmt->execute();
+    $area = $areaStmt->fetch();
     
-    $herbicideQuery = "SELECT COALESCE(SUM(herbicide_used), 0) as total FROM robot_sessions";
-    $herbicide = $db->query($herbicideQuery)->fetch();
+    $herbicideQuery = "SELECT COALESCE(SUM(herbicide_used), 0) as total FROM robot_sessions WHERE user_id = :user_id";
+    $herbicideStmt = $db->prepare($herbicideQuery);
+    $herbicideStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $herbicideStmt->execute();
+    $herbicide = $herbicideStmt->fetch();
     
     $response = [
         'total_weeds' => (int)$totalWeeds['total'],

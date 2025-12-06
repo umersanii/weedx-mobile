@@ -543,10 +543,13 @@ mysql -u root -p weedx -e "SELECT COUNT(*) FROM weed_detections WHERE image_base
 - Integrate ViewModels with Activities
 - Add error handling and retry logic
 
+## Completed
+
+- ✅ Firebase Push Notifications (FCM) - See [FIREBASE_PUSH_NOTIFICATIONS.md](FIREBASE_PUSH_NOTIFICATIONS.md)
+- ✅ MQTT Integration with Firebase Notifications for Alerts
+
 ## Pending
 
-- Firebase Configuration (FCM notifications)
-- Robot Integration (MQTT)
 - Unit/Integration Tests
 - Production Deployment
 

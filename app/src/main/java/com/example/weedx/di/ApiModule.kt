@@ -68,4 +68,10 @@ object ApiModule {
     fun provideAssistantApiService(retrofit: Retrofit): AssistantApiService {
         return retrofit.create(AssistantApiService::class.java)
     }
+    
+    @Provides
+    @Singleton
+    fun provideFcmTokenApiService(retrofit: Retrofit): FcmTokenApiService {
+        return retrofit.create(FcmTokenApiService::class.java)
+    }
 }

@@ -15,6 +15,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../utils/firebase_notification.php';
 
 use PhpMqtt\Client\MqttClient;
 use PhpMqtt\Client\ConnectionSettings;
@@ -40,6 +41,16 @@ $topics = [
 $database = new Database();
 $db = $database->getConnection();
 
+// Firebase notification service
+$firebaseService = null;
+try {
+    $firebaseService = new FirebaseNotificationService();
+    echo "Firebase notification service initialized\n";
+} catch (Exception $e) {
+    echo "Warning: Firebase not configured - push notifications disabled\n";
+    echo "Error: " . $e->getMessage() . "\n";
+}
+
 echo "WeedX MQTT Subscriber Started...\n";
 echo "Connecting to MQTT broker at {$mqttHost}:{$mqttPort}...\n";
 
@@ -60,8 +71,8 @@ try {
     
     // Subscribe to all topics
     foreach ($topics as $topic => $qos) {
-        $mqtt->subscribe($topic, function ($topic, $message) use ($db) {
-            handleMessage($topic, $message, $db);
+        $mqtt->subscribe($topic, function ($topic, $message) use ($db, $firebaseService) {
+            handleMessage($topic, $message, $db, $firebaseService);
         }, $qos);
         echo "Subscribed to: {$topic}\n";
     }
@@ -81,7 +92,7 @@ try {
 /**
  * Handle incoming MQTT messages
  */
-function handleMessage($topic, $message, $db) {
+function handleMessage($topic, $message, $db, $firebaseService) {
     echo "[" . date('Y-m-d H:i:s') . "] Received message on topic: {$topic}\n";
     
     $data = json_decode($message, true);
@@ -114,7 +125,7 @@ function handleMessage($topic, $message, $db) {
                 break;
                 
             case 'weedx/alert':
-                saveAlert($data, $db);
+                saveAlert($data, $db, $firebaseService);
                 break;
                 
             default:
@@ -255,7 +266,7 @@ function saveSoilData($data, $db) {
 /**
  * Save alert
  */
-function saveAlert($data, $db) {
+function saveAlert($data, $db, $firebaseService) {
     // Default to user_id 1 if not provided
     $userId = isset($data['user_id']) ? $data['user_id'] : 1;
     
@@ -279,4 +290,19 @@ function saveAlert($data, $db) {
     }
     
     echo "Alert saved: [{$data['severity']}] {$data['message']}\n";
+    
+    // Send push notification via Firebase
+    if ($firebaseService !== null) {
+        try {
+            $firebaseService->sendAlert(
+                $userId,
+                $data['type'],
+                $data['severity'],
+                $data['message']
+            );
+            echo "Push notification sent to user {$userId}\n";
+        } catch (Exception $e) {
+            echo "Failed to send push notification: " . $e->getMessage() . "\n";
+        }
+    }
 }

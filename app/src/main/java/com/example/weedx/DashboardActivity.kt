@@ -2,6 +2,7 @@ package com.example.weedx
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -14,15 +15,20 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.weedx.data.repositories.FcmTokenRepository
 import com.example.weedx.presentation.viewmodels.DashboardViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class DashboardActivity : AppCompatActivity() {
 
     private val viewModel: DashboardViewModel by viewModels()
+    
+    @Inject
+    lateinit var fcmTokenRepository: FcmTokenRepository
     
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var liveCard: CardView
@@ -88,6 +94,9 @@ class DashboardActivity : AppCompatActivity() {
         
         // Observe ViewModels
         observeViewModel()
+        
+        // Register FCM token
+        registerFcmToken()
         
         // Load data after UI is set up
         viewModel.loadDashboardData()
@@ -321,5 +330,24 @@ class DashboardActivity : AppCompatActivity() {
 
         // Set home as selected
         bottomNavigation.selectedItemId = R.id.nav_home
+    }
+    
+    /**
+     * Register FCM token with backend for push notifications
+     */
+    private fun registerFcmToken() {
+        lifecycleScope.launch {
+            try {
+                // Check if token needs to be registered
+                if (fcmTokenRepository.needsTokenRegistration()) {
+                    Log.d("DashboardActivity", "Registering FCM token with backend...")
+                    fcmTokenRepository.registerFcmToken()
+                    Log.d("DashboardActivity", "FCM token registered successfully")
+                }
+            } catch (e: Exception) {
+                Log.e("DashboardActivity", "Failed to register FCM token: ${e.message}")
+                // Don't show error to user - silent failure is acceptable for push notifications
+            }
+        }
     }
 }

@@ -28,22 +28,28 @@ try {
     $weeds = $weedsStmt->fetch();
     
     // Area covered today
-    $areaQuery = "SELECT COALESCE(SUM(area_covered), 0) as area FROM robot_sessions WHERE DATE(start_time) = CURDATE()";
-    $areaStmt = $db->query($areaQuery);
+    $areaQuery = "SELECT COALESCE(SUM(area_covered), 0) as area FROM robot_sessions WHERE user_id = :user_id AND DATE(start_time) = CURDATE()";
+    $areaStmt = $db->prepare($areaQuery);
+    $areaStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $areaStmt->execute();
     $area = $areaStmt->fetch();
     
     // Herbicide used today
-    $herbicideQuery = "SELECT COALESCE(SUM(herbicide_used), 0) as herbicide FROM robot_sessions WHERE DATE(start_time) = CURDATE()";
-    $herbicideStmt = $db->query($herbicideQuery);
+    $herbicideQuery = "SELECT COALESCE(SUM(herbicide_used), 0) as herbicide FROM robot_sessions WHERE user_id = :user_id AND DATE(start_time) = CURDATE()";
+    $herbicideStmt = $db->prepare($herbicideQuery);
+    $herbicideStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $herbicideStmt->execute();
     $herbicide = $herbicideStmt->fetch();
     
     // Operating hours today
     $hoursQuery = "
         SELECT COALESCE(SUM(TIMESTAMPDIFF(MINUTE, start_time, end_time)), 0) / 60 as hours 
         FROM robot_sessions 
-        WHERE DATE(start_time) = CURDATE() AND end_time IS NOT NULL
+        WHERE user_id = :user_id AND DATE(start_time) = CURDATE() AND end_time IS NOT NULL
     ";
-    $hoursStmt = $db->query($hoursQuery);
+    $hoursStmt = $db->prepare($hoursQuery);
+    $hoursStmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
+    $hoursStmt->execute();
     $hours = $hoursStmt->fetch();
     
     $response = [
