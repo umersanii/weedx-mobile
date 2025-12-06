@@ -98,8 +98,8 @@ class WeedXSimulator:
         payload = {
             "user_id": self.user_id,
             "battery_level": round(self.battery, 1),
-            "operational_status": "active" if self.battery > 20 else "low_battery",
-            "mode": random.choice(["autonomous", "manual", "scanning"]),
+            "status": "active" if self.battery > 20 else "low_battery",
+            "activity": random.choice(["autonomous scanning", "manual control", "weed detection"]),
             "speed": round(self.speed, 2),
             "timestamp": datetime.now().isoformat()
         }
@@ -122,8 +122,8 @@ class WeedXSimulator:
         """Publish battery and herbicide levels"""
         payload = {
             "user_id": self.user_id,
-            "battery_level": round(self.battery, 1),
-            "herbicide_level": round(self.herbicide_level, 2),
+            "battery": round(self.battery, 1),
+            "herbicide": round(self.herbicide_level, 2),
             "herbicide_capacity": 50.0,
             "battery_voltage": round(random.uniform(11.5, 12.6), 2),
             "timestamp": datetime.now().isoformat()
@@ -137,17 +137,17 @@ class WeedXSimulator:
         
         weed_types = ["Broadleaf", "Grass", "Sedge", "Dandelion", "Thistle", "Clover"]
         confidence_levels = ["high", "medium", "low"]
+        crop_types = ["Wheat", "Corn", "Soybean", "Cotton"]
         
         payload = {
             "user_id": self.user_id,
             "detection_id": fake.uuid4(),
             "weed_type": random.choice(weed_types),
-            "confidence": random.choice(confidence_levels),
+            "crop_type": random.choice(crop_types),
+            "confidence": random.randint(70, 99),
             "count": weed_count,
-            "location": {
-                "latitude": round(self.latitude, 6),
-                "longitude": round(self.longitude, 6)
-            },
+            "latitude": round(self.latitude, 6),
+            "longitude": round(self.longitude, 6),
             "size_cm2": round(random.uniform(5, 50), 2),
             "action_taken": random.choice(["sprayed", "marked", "skipped"]),
             "timestamp": datetime.now().isoformat()
@@ -160,10 +160,11 @@ class WeedXSimulator:
             "user_id": self.user_id,
             "moisture": round(random.uniform(20, 60), 1),
             "temperature": round(random.uniform(15, 30), 1),
-            "ph_level": round(random.uniform(5.5, 7.5), 2),
+            "ph": round(random.uniform(5.5, 7.5), 2),
             "nitrogen": round(random.uniform(10, 50), 1),
             "phosphorus": round(random.uniform(10, 50), 1),
             "potassium": round(random.uniform(10, 50), 1),
+            "organic_matter": round(random.uniform(2, 8), 1),
             "timestamp": datetime.now().isoformat()
         }
         self.publish("weedx/sensor/soil", payload)

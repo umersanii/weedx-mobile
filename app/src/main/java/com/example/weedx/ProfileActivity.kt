@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -19,6 +20,7 @@ import com.example.weedx.data.models.response.ProfileResponse
 import com.example.weedx.data.models.response.UserProfile
 import com.example.weedx.presentation.viewmodels.ProfileViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -34,6 +36,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var appSettingsItem: LinearLayout
     private lateinit var helpSupportItem: LinearLayout
     private lateinit var logoutButton: CardView
+    private lateinit var editProfileButton: MaterialButton
     
     // Profile views
     private lateinit var userName: TextView
@@ -43,6 +46,16 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var totalArea: TextView
     private lateinit var robotId: TextView
     private var loadingIndicator: ProgressBar? = null
+    
+    // Activity result launcher for edit profile
+    private val editProfileLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            // Profile was updated, refresh the data
+            viewModel.refresh()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +87,7 @@ class ProfileActivity : AppCompatActivity() {
         appSettingsItem = findViewById(R.id.appSettingsItem)
         helpSupportItem = findViewById(R.id.helpSupportItem)
         logoutButton = findViewById(R.id.logoutButton)
+        editProfileButton = findViewById(R.id.editProfileButton)
         
         // Profile data views
         userName = findViewById(R.id.userName)
@@ -160,6 +174,11 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
+        editProfileButton.setOnClickListener {
+            val intent = Intent(this, EditProfileActivity::class.java)
+            editProfileLauncher.launch(intent)
+        }
+        
         notificationsItem.setOnClickListener {
             Toast.makeText(this, "Notifications", Toast.LENGTH_SHORT).show()
             // TODO: Navigate to Notifications screen

@@ -21,6 +21,9 @@ class ProfileViewModel @Inject constructor(
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Idle)
     val profileState: StateFlow<ProfileState> = _profileState
     
+    private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
+    val updateState: StateFlow<UpdateState> = _updateState
+    
     fun loadProfile() {
         viewModelScope.launch {
             try {
@@ -43,6 +46,30 @@ class ProfileViewModel @Inject constructor(
         }
     }
     
+    fun updateProfile(updates: Map<String, Any>) {
+        viewModelScope.launch {
+            try {
+                _updateState.value = UpdateState.Loading
+                
+                when (val result = profileRepository.updateProfile(updates)) {
+                    is NetworkResult.Success -> {
+                        _updateState.value = UpdateState.Success(result.data)
+                        // Refresh profile after successful update
+                        loadProfile()
+                    }
+                    is NetworkResult.Error -> {
+                        _updateState.value = UpdateState.Error(result.message)
+                    }
+                    is NetworkResult.Loading -> {
+                        _updateState.value = UpdateState.Loading
+                    }
+                }
+            } catch (e: Exception) {
+                _updateState.value = UpdateState.Error(e.localizedMessage ?: "Unknown error")
+            }
+        }
+    }
+    
     fun refresh() {
         loadProfile()
     }
@@ -52,6 +79,13 @@ class ProfileViewModel @Inject constructor(
         object Loading : ProfileState()
         data class Success(val data: ProfileResponse) : ProfileState()
         data class Error(val message: String) : ProfileState()
+    }
+    
+    sealed class UpdateState {
+        object Idle : UpdateState()
+        object Loading : UpdateState()
+        data class Success(val data: UserProfile) : UpdateState()
+        data class Error(val message: String) : UpdateState()
     }
     
     companion object {

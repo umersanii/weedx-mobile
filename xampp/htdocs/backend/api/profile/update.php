@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../utils/auth.php';
+require_once __DIR__ . '/../../utils/image_helper.php';
 require_once __DIR__ . '/../../utils/logger.php';
 
 Logger::logRequest('/api/profile', 'PUT');
@@ -58,8 +59,27 @@ try {
     }
     
     if ($stmt->execute()) {
+        // Fetch updated user data
+        $userQuery = "SELECT id, name, email, avatar, phone, created_at FROM users WHERE id = :id";
+        $userStmt = $db->prepare($userQuery);
+        $userStmt->bindParam(':id', $userId);
+        $userStmt->execute();
+        $user = $userStmt->fetch();
+        
+        // Get full avatar URL if avatar exists
+        $avatarUrl = $user['avatar'] ? ImageHelper::getFullUrl($user['avatar']) : null;
+        
+        $response = [
+            'id' => (int)$user['id'],
+            'name' => $user['name'],
+            'email' => $user['email'],
+            'avatar' => $avatarUrl,
+            'phone' => $user['phone'] ?? null,
+            'joined' => $user['created_at']
+        ];
+        
         Logger::logSuccess('/api/profile', 'Profile updated for user ID: ' . $userId);
-        Response::success(null, 'Profile updated successfully');
+        Response::success($response, 'Profile updated successfully');
     } else {
         Logger::logError('/api/profile', 'Failed to update profile', 500);
         Response::error('Failed to update profile', 500);
