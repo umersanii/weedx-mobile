@@ -263,6 +263,13 @@ WeedX is a **read-only dashboard** for monitoring a precision farming robot. The
 | GET    | /summary/today    | Get today's summary                |
 | GET    | /alerts/recent    | Get recent alerts                  |
 
+### Alerts & Notifications
+| Method | Endpoint           | Description                        |
+|--------|------------------|------------------------------------|
+| GET    | /alerts/all       | Get all alerts with pagination     |
+| GET    | /alerts/recent    | Get recent alerts (limit 5)        |
+| POST   | /alerts/create    | Create new alert                   |
+
 ### Weather & Soil
 | Method | Endpoint                            | Description                                   |
 |--------|-----------------------------------|-----------------------------------------------|

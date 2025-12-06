@@ -49,6 +49,9 @@ class AlertsViewModel @Inject constructor(
                     is NetworkResult.Error -> {
                         _alertsState.value = AlertsState.Error(result.message)
                     }
+                    is NetworkResult.Loading -> {
+                        // Already handled above
+                    }
                 }
             } catch (e: Exception) {
                 _alertsState.value = AlertsState.Error(e.message ?: "An error occurred")

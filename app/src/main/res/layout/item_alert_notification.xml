@@ -32,7 +32,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_alert"
+                    android:src="@drawable/ic_alert_triangle"
                     app:tint="@color/orange_primary"
                     android:contentDescription="Alert icon" />
 
@@ -95,7 +95,7 @@
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:textColor="@color/white"
-                    android:background="@drawable/rounded_badge"
+                    android:background="@drawable/rounded_button"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
                     android:paddingTop="4dp"
@@ -110,7 +110,7 @@
                 android:layout_height="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/circle_shape"
+                android:background="@drawable/circle_indicator"
                 android:backgroundTint="@color/green_primary"
                 android:visibility="gone" />
 

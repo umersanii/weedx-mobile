@@ -63,19 +63,19 @@ class AlertsAdapter : RecyclerView.Adapter<AlertsAdapter.AlertViewHolder>() {
                     severityBadge.setBackgroundColor(Color.parseColor("#EF4444"))
                     alertIconCard.setCardBackgroundColor(Color.parseColor("#FEE2E2"))
                     alertIcon.setColorFilter(Color.parseColor("#EF4444"))
-                    alertIcon.setImageResource(R.drawable.ic_error)
+                    alertIcon.setImageResource(R.drawable.ic_alert_circle)
                 }
                 "warning" -> {
                     severityBadge.setBackgroundColor(Color.parseColor("#F59E0B"))
                     alertIconCard.setCardBackgroundColor(Color.parseColor("#FEF3C7"))
                     alertIcon.setColorFilter(Color.parseColor("#F59E0B"))
-                    alertIcon.setImageResource(R.drawable.ic_alert)
+                    alertIcon.setImageResource(R.drawable.ic_alert_triangle)
                 }
                 else -> { // info
                     severityBadge.setBackgroundColor(Color.parseColor("#3B82F6"))
                     alertIconCard.setCardBackgroundColor(Color.parseColor("#DBEAFE"))
                     alertIcon.setColorFilter(Color.parseColor("#3B82F6"))
-                    alertIcon.setImageResource(R.drawable.ic_info)
+                    alertIcon.setImageResource(R.drawable.ic_alert_circle)
                 }
             }
 

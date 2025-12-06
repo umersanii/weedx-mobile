@@ -21,6 +21,7 @@ import com.example.weedx.data.models.response.UserProfile
 import com.example.weedx.presentation.viewmodels.ProfileViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.switchmaterial.SwitchMaterial
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -33,7 +34,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var notificationsItem: LinearLayout
-    private lateinit var appSettingsItem: LinearLayout
+    private lateinit var notificationsToggle: SwitchMaterial
     private lateinit var helpSupportItem: LinearLayout
     private lateinit var logoutButton: CardView
     private lateinit var editProfileButton: MaterialButton
@@ -44,7 +45,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var memberSince: TextView
     private lateinit var farmName: TextView
     private lateinit var totalArea: TextView
-    private lateinit var robotId: TextView
+    private lateinit var farmLocation: TextView
     private var loadingIndicator: ProgressBar? = null
     
     // Activity result launcher for edit profile
@@ -84,7 +85,7 @@ class ProfileActivity : AppCompatActivity() {
     private fun initViews() {
         bottomNavigation = findViewById(R.id.bottomNavigation)
         notificationsItem = findViewById(R.id.notificationsItem)
-        appSettingsItem = findViewById(R.id.appSettingsItem)
+        notificationsToggle = findViewById(R.id.notificationsToggle)
         helpSupportItem = findViewById(R.id.helpSupportItem)
         logoutButton = findViewById(R.id.logoutButton)
         editProfileButton = findViewById(R.id.editProfileButton)
@@ -95,7 +96,7 @@ class ProfileActivity : AppCompatActivity() {
         memberSince = findViewById(R.id.memberSince)
         farmName = findViewById(R.id.farmName)
         totalArea = findViewById(R.id.totalArea)
-        robotId = findViewById(R.id.robotId)
+        farmLocation = findViewById(R.id.farmLocation)
         loadingIndicator = findViewById(R.id.loadingIndicator)
     }
     
@@ -135,6 +136,11 @@ class ProfileActivity : AppCompatActivity() {
         
         // Update farm info
         profile.farm?.let { updateFarmInfo(it) } ?: updateFarmInfo(ProfileViewModel.DEFAULT_FARM)
+        
+        // Update settings
+        profile.settings?.let { 
+            notificationsToggle.isChecked = it.notifications
+        }
     }
     
     private fun updateUserInfo(user: UserProfile) {
@@ -146,13 +152,13 @@ class ProfileActivity : AppCompatActivity() {
     private fun updateFarmInfo(farm: FarmInfo) {
         farmName.text = farm.name
         totalArea.text = "${farm.area?.toInt() ?: 0} hectares"
-        // Robot ID is not part of farm info, keep default or load separately
+        farmLocation.text = farm.location ?: "Not set"
     }
     
     private fun showDefaultData() {
         updateUserInfo(ProfileViewModel.DEFAULT_USER)
         updateFarmInfo(ProfileViewModel.DEFAULT_FARM)
-        robotId.text = "WX-2024-001"
+        farmLocation.text = "Not set"
     }
     
     private fun formatMemberSince(dateStr: String): String {
@@ -183,10 +189,9 @@ class ProfileActivity : AppCompatActivity() {
             val intent = Intent(this, NotificationsActivity::class.java)
             startActivity(intent)
         }
-
-        appSettingsItem.setOnClickListener {
-            Toast.makeText(this, "App Settings", Toast.LENGTH_SHORT).show()
-            // TODO: Navigate to App Settings screen
+        
+        notificationsToggle.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.updateNotificationSetting(isChecked)
         }
 
         helpSupportItem.setOnClickListener {

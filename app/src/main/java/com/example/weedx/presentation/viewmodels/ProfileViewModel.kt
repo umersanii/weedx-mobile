@@ -97,6 +97,19 @@ class ProfileViewModel @Inject constructor(
         }
     }
     
+    fun updateNotificationSetting(enabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                val settings = mapOf("notifications_enabled" to enabled)
+                profileRepository.updateSettings(settings)
+                // Optionally refresh profile to get updated settings
+                loadProfile()
+            } catch (e: Exception) {
+                // Handle error silently or show toast
+            }
+        }
+    }
+    
     fun refresh() {
         loadProfile()
     }

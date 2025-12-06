@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:navigationIcon="@drawable/ic_back"
+        app:navigationIcon="@drawable/ic_arrow_back"
         app:title="Notifications"
         app:titleTextColor="@color/black" />
 
@@ -88,7 +88,7 @@
         <ImageView
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:src="@drawable/ic_error"
+            android:src="@drawable/ic_alert_circle"
             app:tint="@color/red_primary"
             android:contentDescription="Error" />
 
