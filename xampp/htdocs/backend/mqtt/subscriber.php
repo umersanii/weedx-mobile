@@ -32,7 +32,6 @@ $topics = [
     'weedx/robot/location' => 1,
     'weedx/robot/battery' => 1,
     'weedx/weed/detection' => 1,
-    'weedx/sensor/weather' => 1,
     'weedx/sensor/soil' => 1,
     'weedx/alert' => 1
 ];
@@ -110,10 +109,6 @@ function handleMessage($topic, $message, $db) {
                 saveWeedDetection($data, $db);
                 break;
                 
-            case 'weedx/sensor/weather':
-                saveWeatherData($data, $db);
-                break;
-                
             case 'weedx/sensor/soil':
                 saveSoilData($data, $db);
                 break;
@@ -137,6 +132,9 @@ function handleMessage($topic, $message, $db) {
  * Update robot status
  */
 function updateRobotStatus($data, $db) {
+    // Default to user_id 1 if not provided
+    $userId = isset($data['user_id']) ? $data['user_id'] : 1;
+    
     $query = "UPDATE robot_status SET 
               status = :status,
               activity = :activity,
@@ -147,6 +145,14 @@ function updateRobotStatus($data, $db) {
     $stmt->bindParam(':status', $data['status']);
     $stmt->bindParam(':activity', $data['activity']);
     $stmt->execute();
+    
+    // Log activity
+    $logQuery = "INSERT INTO robot_activity_log (user_id, action, description, status) VALUES (:user_id, 'Status Update', :description, 'completed')";
+    $logStmt = $db->prepare($logQuery);
+    $logStmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $description = "Robot status changed to {$data['status']} - {$data['activity']}";
+    $logStmt->bindParam(':description', $description);
+    $logStmt->execute();
     
     echo "Robot status updated: {$data['status']}\n";
 }
@@ -195,40 +201,34 @@ function updateBatteryLevel($data, $db) {
  * Save weed detection
  */
 function saveWeedDetection($data, $db) {
+    // Default to user_id 1 if not provided (for robot integration)
+    $userId = isset($data['user_id']) ? $data['user_id'] : 1;
+    
+    // Handle image data - support both path and base64
+    $imageBase64 = null;
+    $imageMimeType = null;
+    
+    if (isset($data['image_base64'])) {
+        $imageBase64 = $data['image_base64'];
+        $imageMimeType = isset($data['image_mime_type']) ? $data['image_mime_type'] : 'image/jpeg';
+    }
+    
     $query = "INSERT INTO weed_detections 
-              (weed_type, crop_type, confidence, latitude, longitude, image_path, detected_at) 
-              VALUES (:weed_type, :crop_type, :confidence, :latitude, :longitude, :image_path, NOW())";
+              (user_id, weed_type, crop_type, confidence, latitude, longitude, image_base64, image_mime_type, detected_at) 
+              VALUES (:user_id, :weed_type, :crop_type, :confidence, :latitude, :longitude, :image_base64, :image_mime_type, NOW())";
               
     $stmt = $db->prepare($query);
+    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
     $stmt->bindParam(':weed_type', $data['weed_type']);
     $stmt->bindParam(':crop_type', $data['crop_type']);
     $stmt->bindParam(':confidence', $data['confidence']);
     $stmt->bindParam(':latitude', $data['latitude']);
     $stmt->bindParam(':longitude', $data['longitude']);
-    $stmt->bindParam(':image_path', $data['image_path']);
+    $stmt->bindParam(':image_base64', $imageBase64);
+    $stmt->bindParam(':image_mime_type', $imageMimeType);
     $stmt->execute();
     
-    echo "Weed detection saved: {$data['weed_type']} (confidence: {$data['confidence']}%)\n";
-}
-
-/**
- * Save weather data
- */
-function saveWeatherData($data, $db) {
-    $query = "INSERT INTO weather_data 
-              (temperature, humidity, weather_condition, wind_speed, wind_direction, pressure, recorded_at) 
-              VALUES (:temp, :humidity, :condition, :wind_speed, :wind_dir, :pressure, NOW())";
-              
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':temp', $data['temperature']);
-    $stmt->bindParam(':humidity', $data['humidity']);
-    $stmt->bindParam(':condition', $data['condition']);
-    $stmt->bindParam(':wind_speed', $data['wind_speed']);
-    $stmt->bindParam(':wind_dir', $data['wind_direction']);
-    $stmt->bindParam(':pressure', $data['pressure']);
-    $stmt->execute();
-    
-    echo "Weather data saved: {$data['temperature']}°C, {$data['condition']}\n";
+    echo "Weed detection saved: {$data['weed_type']} (confidence: {$data['confidence']}%) for user {$userId}\n";
 }
 
 /**
@@ -256,6 +256,9 @@ function saveSoilData($data, $db) {
  * Save alert
  */
 function saveAlert($data, $db) {
+    // Default to user_id 1 if not provided
+    $userId = isset($data['user_id']) ? $data['user_id'] : 1;
+    
     $query = "INSERT INTO alerts 
               (type, severity, message, created_at) 
               VALUES (:type, :severity, :message, NOW())";
@@ -265,6 +268,15 @@ function saveAlert($data, $db) {
     $stmt->bindParam(':severity', $data['severity']);
     $stmt->bindParam(':message', $data['message']);
     $stmt->execute();
+    
+    // Log to robot activity if it's a robot-related alert
+    if (in_array($data['type'], ['battery', 'fault', 'maintenance'])) {
+        $logQuery = "INSERT INTO robot_activity_log (user_id, action, description, status) VALUES (:user_id, 'Alert', :description, 'completed')";
+        $logStmt = $db->prepare($logQuery);
+        $logStmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $logStmt->bindParam(':description', $data['message']);
+        $logStmt->execute();
+    }
     
     echo "Alert saved: [{$data['severity']}] {$data['message']}\n";
 }

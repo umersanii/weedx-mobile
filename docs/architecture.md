@@ -10,63 +10,79 @@ WeedX is a **read-only dashboard** for monitoring a precision farming robot. The
 
 ```
 ┌─────────────────┐
-│  Farming Robot  │  (Raspberry Pi + ROS2)
-│  - Camera       │
-│  - GPS          │
-│  - Sensors      │
+│  Robot/Script   │  Publishes JSON data
 └────────┬────────┘
-         │ Publishes telemetry & weed detections
+         │
          ↓
 ┌─────────────────┐
-│  MQTT Broker    │  (Mosquitto)
+│  MQTT Broker    │  (Mosquitto on localhost:1883)
 └────────┬────────┘
-         │ Subscribes
+         │
          ↓
 ┌─────────────────┐
-│  PHP Backend    │
-│  - MQTT Sub     │
-│  - REST API     │────→ Sends FCM notifications
-│  - MySQL        │
+│ PHP Subscriber  │  (weedx-mqtt.service - always running)
+│  Listens to     │  Auto-saves to MySQL
+│  6 topics       │
 └────────┬────────┘
-         │ REST API calls
+         │
          ↓
 ┌─────────────────┐
-│  Android App    │  (Kotlin)
-│  - Dashboard    │
-│  - Monitoring   │
-│  - Reports      │
+│  MySQL Database │  (weedx)
+│  12 tables      │
+└────────┬────────┘
+         │
+         ↓
+┌─────────────────┐
+│  REST API       │  (PHP backend - 51+ endpoints)
+│  Apache/Pi      │
+└────────┬────────┘
+         │
+         ↓
+┌─────────────────┐
+│  Android App    │  (Kotlin MVVM)
+│  Read-only      │
+│  Dashboard      │
 └─────────────────┘
 ```
+
+**Key**: Robot → MQTT → Subscriber → MySQL → API → App
 
 ---
 
 ## Components
 
-### 1. **Farming Robot**
-- Raspberry Pi running ROS2
-- Publishes data via MQTT:
-  - GPS location
-  - Battery level
-  - Weed detections (image + coordinates)
-  - Sensor readings (soil, weather)
+### 1. **Robot/External Script**
+- Publishes JSON data to MQTT topics
+- Data: GPS, battery, weed detections, soil readings
+- No direct connection to app or database
 
-### 2. **MQTT Broker**
-- Receives all robot data
-- No direct connection to Android app
-- Acts as message queue between robot and backend
+### 2. **MQTT Broker** (Mosquitto)
+- Runs on `localhost:1883`
+- Message queue between robot and backend
+- 6 active topics (status, location, battery, weed detection, soil, alerts)
 
-### 3. **PHP Backend**
-- **MQTT Subscriber**: Listens to robot topics, saves to MySQL
-- **REST API**: Provides endpoints for Android app
-- **FCM**: Sends push notifications for alerts
-- **MySQL**: Stores all historical data
+### 3. **PHP MQTT Subscriber** (`weedx-mqtt.service`)
+- Systemd service (always running in background)
+- Subscribes to all MQTT topics
+- Automatically saves incoming data to MySQL
+- No manual intervention needed
 
-### 4. **Android App**
-- **Firebase Auth**: User login/signup
-- **Multi-step Registration**: User info, Farm info, App settings
-- **Retrofit**: Fetches data from REST API
-- **FCM**: Receives push notifications
-- **UI**: Displays dashboards, logs, reports
+### 4. **MySQL Database**
+- 12 tables for users, robots, detections, sensors
+- User data isolation (user_id filtering)
+- Stores images as base64
+
+### 5. **PHP REST API Backend**
+- 51+ endpoints organized by feature
+- JWT authentication with user isolation
+- Apache serves from `/var/www/html/weedx-backend/`
+- Weather fetched via API, not MQTT
+
+### 6. **Android App**
+- Read-only dashboard
+- Firebase Auth for login
+- Retrofit for REST API calls
+- No MQTT interaction
 
 ---
 

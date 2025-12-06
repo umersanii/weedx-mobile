@@ -25,12 +25,14 @@
 
 ## Architecture Overview
 
-**System flow:** Robot → MQTT → PHP Backend → MySQL → REST API → Android App
+**System flow:** Robot/Script → MQTT → PHP Subscriber → MySQL → REST API → Android App
 
+- **MQTT**: Mosquitto broker on `localhost:1883`, 6 active topics
+- **Subscriber**: `weedx-mqtt.service` (systemd) - auto-saves MQTT data to MySQL
+- **Backend**: PHP REST API (51+ endpoints) + MySQL on Raspberry Pi via Tailscale
 - **Android**: Kotlin + XML (Material 3) + MVVM + Hilt DI + ViewBinding
-- **Backend**: PHP REST API + MySQL (MariaDB) on Raspberry Pi via Tailscale
 - **Auth**: Firebase Auth in app, JWT tokens from backend
-- **App is read-only dashboard** - no robot control commands
+- **App is read-only dashboard** - no robot control, no MQTT interaction
 
 ## Project Structure
 
@@ -119,6 +121,8 @@ All backend responses use: `ApiResponse<T>(success: Boolean, message: String?, d
 | Example ViewModel | `presentation/viewmodels/DashboardViewModel.kt` |
 | Backend source | `xampp/htdocs/backend/api/` (edit here) |
 | Backend production | `/var/www/html/weedx-backend/api/` (deployed here) |
+| MQTT subscriber | `xampp/htdocs/backend/mqtt/subscriber.php` |
+| MQTT publisher tool | `scripts/mqtt-publisher.sh` |
 
 ## Commands
 
@@ -126,15 +130,24 @@ All backend responses use: `ApiResponse<T>(success: Boolean, message: String?, d
 # Build Android
 ./gradlew assembleDebug
 
-# Test backend endpoints (from project root)
+# Test backend
 ./scripts/test-backend.sh http://raspberrypi.mullet-bull.ts.net/weedx-backend
 
-# Deploy backend changes to production (REQUIRED after backend edits)
+# Deploy backend (REQUIRED after backend edits)
 bash scripts/deploy-backend.sh
-# Or manual: sudo cp -r xampp/htdocs/backend/* /var/www/html/weedx-backend/
 
-# Deploy to remote Pi (if not running on Pi)
-./scripts/deploy-to-pi.sh
+# Setup MQTT
+bash scripts/setup-mqtt.sh
+
+# Publish MQTT test data
+bash scripts/mqtt-publisher.sh batch
+
+# Monitor MQTT subscriber
+sudo journalctl -u weedx-mqtt -f
+
+# Restart services
+sudo systemctl restart apache2
+sudo systemctl restart weedx-mqtt
 ```
 
 ## Backend API Structure
@@ -162,4 +175,6 @@ Each endpoint uses `utils/response.php` → `Response::success($data)` or `Respo
 
 ## Docs to Maintain
 
-Only maintain: `docs/` and `xampp/htdocs/backend/` directories
+- `docs/SETUP_GUIDE.md` - Complete setup guide (merged MQTT + backend setup)
+- `docs/architecture.md` - System architecture and API endpoints
+- `xampp/htdocs/backend/` - Backend source code
