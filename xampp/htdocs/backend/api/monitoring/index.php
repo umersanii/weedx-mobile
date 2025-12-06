@@ -28,9 +28,13 @@ try {
     $response = [
         'metrics' => [
             'battery' => (int)($metrics['battery_level'] ?? 0),
-            'herbicide_level' => (int)($metrics['herbicide_level'] ?? 0),
+            'herbicide_level' => (float)($metrics['herbicide_level'] ?? 0),
             'coverage' => (float)($metrics['area_covered_today'] ?? 0),
-            'efficiency' => (float)($metrics['efficiency'] ?? 0)
+            'efficiency' => (float)($metrics['efficiency'] ?? 0),
+            'status' => $metrics['status'] ?? 'offline',
+            'speed' => (float)($metrics['speed'] ?? 0),
+            'heading' => (float)($metrics['heading'] ?? 0),
+            'activity' => $metrics['activity'] ?? null
         ],
         'activity_timeline' => array_map(function($activity) {
             return [

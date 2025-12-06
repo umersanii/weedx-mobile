@@ -37,7 +37,12 @@ class AlertAdapter(
         
         holder.alertType.text = alert.type
         holder.alertMessage.text = alert.message
-        holder.alertTime.text = formatTimeAgo(alert.timestamp)
+        
+        // Debug logging
+        android.util.Log.d("AlertAdapter", "Formatting timestamp: ${alert.timestamp}")
+        val formattedTime = formatTimeAgo(alert.timestamp)
+        android.util.Log.d("AlertAdapter", "Formatted result: $formattedTime")
+        holder.alertTime.text = formattedTime
         
         // Set icon based on severity
         when (alert.severity.lowercase()) {
@@ -70,36 +75,29 @@ class AlertAdapter(
     
     private fun formatTimeAgo(timestamp: String): String {
         return try {
-            // Try multiple date formats to handle various timestamp formats
-            val formats = listOf(
-                SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()),
-                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()),
-                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault()),
-                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).apply {
-                    timeZone = TimeZone.getTimeZone("UTC")
-                }
-            )
-            
-            var date: Date? = null
-            for (format in formats) {
-                try {
-                    date = format.parse(timestamp)
-                    if (date != null) break
-                } catch (e: Exception) {
-                    // Try next format
-                }
-            }
-            
-            if (date == null) return timestamp
+            // Parse timestamp - assume it's in local timezone (as stored by MySQL)
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val date = dateFormat.parse(timestamp) ?: return timestamp
             
             val now = Date()
             val diff = now.time - date.time
             
+            // Get calendar instances to check if it's the same day
+            val alertCalendar = java.util.Calendar.getInstance().apply { time = date }
+            val nowCalendar = java.util.Calendar.getInstance().apply { time = now }
+            
+            val isSameDay = alertCalendar.get(java.util.Calendar.YEAR) == nowCalendar.get(java.util.Calendar.YEAR) &&
+                            alertCalendar.get(java.util.Calendar.DAY_OF_YEAR) == nowCalendar.get(java.util.Calendar.DAY_OF_YEAR)
+            
+            val isYesterday = alertCalendar.get(java.util.Calendar.YEAR) == nowCalendar.get(java.util.Calendar.YEAR) &&
+                              alertCalendar.get(java.util.Calendar.DAY_OF_YEAR) == nowCalendar.get(java.util.Calendar.DAY_OF_YEAR) - 1
+            
             when {
                 diff < 0 -> "Just now" // Handle future timestamps
                 diff < TimeUnit.MINUTES.toMillis(1) -> "Just now"
-                diff < TimeUnit.HOURS.toMillis(1) -> "${TimeUnit.MILLISECONDS.toMinutes(diff)}m ago"
-                diff < TimeUnit.DAYS.toMillis(1) -> "${TimeUnit.MILLISECONDS.toHours(diff)}h ago"
+                isSameDay && diff < TimeUnit.HOURS.toMillis(1) -> "${TimeUnit.MILLISECONDS.toMinutes(diff)}m ago"
+                isSameDay && diff < TimeUnit.HOURS.toMillis(24) -> "${TimeUnit.MILLISECONDS.toHours(diff)}h ago"
+                isYesterday -> "Yesterday"
                 diff < TimeUnit.DAYS.toMillis(7) -> "${TimeUnit.MILLISECONDS.toDays(diff)}d ago"
                 else -> {
                     // For older dates, show formatted date
@@ -108,6 +106,7 @@ class AlertAdapter(
                 }
             }
         } catch (e: Exception) {
+            android.util.Log.e("AlertAdapter", "Error formatting timestamp: ${e.message}")
             timestamp
         }
     }

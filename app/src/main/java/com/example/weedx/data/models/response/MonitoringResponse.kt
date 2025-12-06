@@ -14,7 +14,11 @@ data class Metrics(
     @SerializedName("herbicide_level")
     val herbicideLevel: Double,
     val coverage: Double,
-    val efficiency: Double
+    val efficiency: Double,
+    val status: String? = null,
+    val speed: Double? = null,
+    val heading: Double? = null,
+    val activity: String? = null
 )
 
 data class Activity(

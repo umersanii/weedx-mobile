@@ -34,7 +34,11 @@ class LiveMonitoringActivity : AppCompatActivity() {
     private lateinit var herbicideValue: TextView
     private lateinit var coverageValue: TextView
     private lateinit var efficiencyValue: TextView
-    private lateinit var swipeRefresh: SwipeRefreshLayout
+    private lateinit var currentSpeedValue: TextView
+    private lateinit var uptimeValue: TextView
+    private lateinit var robotStatusText: TextView
+    private lateinit var robotActiveCard: androidx.cardview.widget.CardView
+    private lateinit var statusIndicator: View
     private lateinit var lastUpdatedText: TextView
     private val timelineEvents = mutableListOf<TimelineEvent>()
     
@@ -69,6 +73,11 @@ class LiveMonitoringActivity : AppCompatActivity() {
         herbicideValue = findViewById(R.id.herbicideValue)
         coverageValue = findViewById(R.id.coverageValue)
         efficiencyValue = findViewById(R.id.efficiencyValue)
+        currentSpeedValue = findViewById(R.id.currentSpeedValue)
+        uptimeValue = findViewById(R.id.uptimeValue)
+        robotStatusText = findViewById(R.id.robotStatusText)
+        robotActiveCard = findViewById(R.id.robotActiveCard)
+        statusIndicator = findViewById(R.id.statusIndicator)
         lastUpdatedText = findViewById(R.id.lastUpdatedText)
 
         setupTimeline()
@@ -176,6 +185,28 @@ class LiveMonitoringActivity : AppCompatActivity() {
         herbicideValue.text = String.format("%.1fL", data.metrics.herbicideLevel)
         coverageValue.text = String.format("%.1fha", data.metrics.coverage)
         efficiencyValue.text = String.format("%.0f%%", data.metrics.efficiency)
+        
+        // Update speed (default to 0.0 if null)
+        val speed = data.metrics.speed ?: 0.0
+        currentSpeedValue.text = String.format("%.1f km/h", speed)
+        
+        // Update activity/uptime (use activity field or default)
+        val activity = data.metrics.activity ?: "No activity"
+        uptimeValue.text = activity
+        
+        // Update robot status and colors
+        val status = data.metrics.status ?: "offline"
+        val isActive = status.equals("active", ignoreCase = true)
+        
+        robotStatusText.text = if (isActive) "Robot Active" else "Live Monitoring Off"
+        
+        // Change card color based on status
+        val cardColor = if (isActive) {
+            getColor(R.color.green_primary)
+        } else {
+            getColor(android.R.color.holo_red_light)
+        }
+        robotActiveCard.setCardBackgroundColor(cardColor)
         
         // Update timeline with real data
         timelineEvents.clear()

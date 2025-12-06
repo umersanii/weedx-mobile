@@ -53,6 +53,7 @@
 
             <!-- Robot Active Card -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/robotActiveCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
@@ -75,11 +76,13 @@
 
                         <!-- Status Indicator -->
                         <View
+                            android:id="@+id/statusIndicator"
                             android:layout_width="12dp"
                             android:layout_height="12dp"
                             android:background="@drawable/circle_white" />
 
                         <TextView
+                            android:id="@+id/robotStatusText"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
