@@ -235,6 +235,10 @@ See [gradle/libs.versions.toml](gradle/libs.versions.toml) for full list.
 
 
 
+### ✅ Recently Completed
+- [x] Assistant feature (full Android integration with keyword-based backend)
+
+
 ---
 
 ## 🛣️ Roadmap
@@ -274,7 +278,7 @@ This project is for educational purposes.
 
 ## 👥 Team
 
-**Developer**: Syed Ali Sada Sani  
+**Developer**: Umer Sani  
 **GitHub**: [@umersanii](https://github.com/umersanii)
 
 ---

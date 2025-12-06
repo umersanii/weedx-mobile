@@ -1,7 +1,6 @@
 # WeedX - Copilot Instructions
 
 > Keep responses short and concise, yet complete.
-> This VS CODE Instance is running on the raspberry pi hosting the backend.
 
 ## ⚠️ CRITICAL: Backend File Locations
 

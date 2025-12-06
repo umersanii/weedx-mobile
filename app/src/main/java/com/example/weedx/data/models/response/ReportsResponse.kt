@@ -47,12 +47,15 @@ data class DistributionData(
 )
 
 data class ExportResponse(
-    @SerializedName("url")
-    val url: String,
-    
     @SerializedName("format")
     val format: String,
     
     @SerializedName("filename")
-    val filename: String
+    val filename: String,
+    
+    @SerializedName("download_url")
+    val downloadUrl: String,
+    
+    @SerializedName("generated_at")
+    val generatedAt: String
 )

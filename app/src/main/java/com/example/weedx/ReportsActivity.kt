@@ -1,8 +1,13 @@
 package com.example.weedx
 
+import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.util.Base64
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -20,11 +25,14 @@ import com.example.weedx.presentation.viewmodels.ReportsViewModel
 import com.example.weedx.presentation.viewmodels.ReportsViewModel.Period
 import com.example.weedx.presentation.viewmodels.ReportsViewModel.ReportsState
 import com.example.weedx.presentation.viewmodels.ReportsViewModel.TrendState
+import com.example.weedx.presentation.viewmodels.ReportsViewModel.ExportState
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 
 @AndroidEntryPoint
 class ReportsActivity : AppCompatActivity() {
@@ -167,6 +175,25 @@ class ReportsActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
+            viewModel.exportState.collectLatest { state ->
+                when (state) {
+                    is ExportState.Idle -> {}
+                    is ExportState.Loading -> {
+                        Toast.makeText(this@ReportsActivity, "Generating report...", Toast.LENGTH_SHORT).show()
+                    }
+                    is ExportState.Success -> {
+                        downloadReport(state.data.downloadUrl, state.data.filename)
+                        viewModel.resetExportState()
+                    }
+                    is ExportState.Error -> {
+                        Toast.makeText(this@ReportsActivity, "Export failed: ${state.message}", Toast.LENGTH_SHORT).show()
+                        viewModel.resetExportState()
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
             viewModel.selectedPeriod.collectLatest { period ->
                 updateTabSelection(period)
             }
@@ -224,8 +251,55 @@ class ReportsActivity : AppCompatActivity() {
 
     private fun setupDownloadButton() {
         downloadButton.setOnClickListener {
-            Toast.makeText(this, "Downloading report...", Toast.LENGTH_SHORT).show()
-            // TODO: Implement export via API
+            viewModel.exportReport("csv")
+        }
+    }
+
+    private fun downloadReport(downloadUrl: String, filename: String) {
+        try {
+            // Check if it's a data URI (base64 encoded)
+            if (downloadUrl.startsWith("data:text/csv;base64,")) {
+                val base64Data = downloadUrl.substring("data:text/csv;base64,".length)
+                val decodedBytes = Base64.decode(base64Data, Base64.DEFAULT)
+                
+                // For Android 10+ (API 29+), use MediaStore or Downloads directory
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                    // Use scoped storage for Android 10+
+                    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    if (!downloadsDir.exists()) {
+                        downloadsDir.mkdirs()
+                    }
+                    val file = File(downloadsDir, filename)
+                    
+                    FileOutputStream(file).use { outputStream ->
+                        outputStream.write(decodedBytes)
+                    }
+                } else {
+                    // For older versions
+                    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    val file = File(downloadsDir, filename)
+                    
+                    FileOutputStream(file).use { outputStream ->
+                        outputStream.write(decodedBytes)
+                    }
+                }
+                
+                Toast.makeText(this, "Report saved to Downloads/$filename", Toast.LENGTH_LONG).show()
+            } else {
+                // Handle regular URL download
+                val request = DownloadManager.Request(Uri.parse(downloadUrl))
+                    .setTitle("WeedX Report")
+                    .setDescription("Downloading report...")
+                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename)
+                
+                val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                downloadManager.enqueue(request)
+                
+                Toast.makeText(this, "Downloading report...", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to download: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 

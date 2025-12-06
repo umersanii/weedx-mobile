@@ -92,7 +92,7 @@ class WeedXFirebaseMessagingService : FirebaseMessagingService() {
             "battery" -> R.drawable.ic_battery_alert
             "fault" -> R.drawable.ic_error
             "maintenance" -> R.drawable.ic_settings
-            "detection" -> R.drawable.ic_eco
+            "detection" -> R.drawable.ic_leaf
             else -> R.drawable.ic_notifications
         }
         

@@ -3,6 +3,7 @@ package com.example.weedx.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weedx.data.models.response.DistributionData
+import com.example.weedx.data.models.response.ExportResponse
 import com.example.weedx.data.models.response.ReportWidgets
 import com.example.weedx.data.models.response.ReportsResponse
 import com.example.weedx.data.models.response.TrendData
@@ -26,6 +27,9 @@ class ReportsViewModel @Inject constructor(
     private val _trendState = MutableStateFlow<TrendState>(TrendState.Idle)
     val trendState: StateFlow<TrendState> = _trendState.asStateFlow()
 
+    private val _exportState = MutableStateFlow<ExportState>(ExportState.Idle)
+    val exportState: StateFlow<ExportState> = _exportState.asStateFlow()
+
     private val _selectedPeriod = MutableStateFlow(Period.WEEKLY)
     val selectedPeriod: StateFlow<Period> = _selectedPeriod.asStateFlow()
 
@@ -44,6 +48,13 @@ class ReportsViewModel @Inject constructor(
         data object Loading : TrendState()
         data class Success(val data: List<TrendData>) : TrendState()
         data class Error(val message: String) : TrendState()
+    }
+
+    sealed class ExportState {
+        data object Idle : ExportState()
+        data object Loading : ExportState()
+        data class Success(val data: ExportResponse) : ExportState()
+        data class Error(val message: String) : ExportState()
     }
 
     enum class Period(val days: Int) {
@@ -94,6 +105,28 @@ class ReportsViewModel @Inject constructor(
             _selectedPeriod.value = period
             loadTrend(period.days)
         }
+    }
+
+    fun exportReport(format: String = "csv") {
+        viewModelScope.launch {
+            _exportState.value = ExportState.Loading
+
+            when (val result = reportsRepository.exportReport(format)) {
+                is NetworkResult.Success -> {
+                    _exportState.value = ExportState.Success(result.data)
+                }
+                is NetworkResult.Error -> {
+                    _exportState.value = ExportState.Error(result.message)
+                }
+                is NetworkResult.Loading -> {
+                    _exportState.value = ExportState.Loading
+                }
+            }
+        }
+    }
+
+    fun resetExportState() {
+        _exportState.value = ExportState.Idle
     }
 
     fun refresh() {
