@@ -11,7 +11,9 @@ interface GalleryApiService {
     @GET("gallery")
     suspend fun getGalleryImages(
         @Query("offset") offset: Int? = null,
-        @Query("limit") limit: Int? = null
+        @Query("limit") limit: Int? = null,
+        @Query("start_date") startDate: String? = null,
+        @Query("end_date") endDate: String? = null
     ): Response<ApiResponse<List<GalleryImage>>>
     
     @Multipart

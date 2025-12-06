@@ -87,6 +87,9 @@ dependencies {
     // MPAndroidChart
     implementation(libs.mpandroidchart)
     
+    // PhotoView for image zoom
+    implementation(libs.photoview)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -195,8 +195,8 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         helpSupportItem.setOnClickListener {
-            Toast.makeText(this, "Help & Support", Toast.LENGTH_SHORT).show()
-            // TODO: Navigate to Help & Support screen
+            val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://umersanii.vercel.app"))
+            startActivity(intent)
         }
 
         logoutButton.setOnClickListener {

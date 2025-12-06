@@ -12,9 +12,14 @@ import javax.inject.Singleton
 class GalleryRepository @Inject constructor(
     private val galleryApiService: GalleryApiService
 ) {
-    suspend fun getGalleryImages(offset: Int? = null, limit: Int? = null): NetworkResult<List<GalleryImage>> {
+    suspend fun getGalleryImages(
+        offset: Int? = null, 
+        limit: Int? = null,
+        startDate: String? = null,
+        endDate: String? = null
+    ): NetworkResult<List<GalleryImage>> {
         return try {
-            val response = galleryApiService.getGalleryImages(offset, limit)
+            val response = galleryApiService.getGalleryImages(offset, limit, startDate, endDate)
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.data?.let {
                     NetworkResult.Success(it)

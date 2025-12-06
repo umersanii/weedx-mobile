@@ -21,6 +21,8 @@ $db = $database->getConnection();
 try {
     $limit = $_GET['limit'] ?? 50;
     $offset = $_GET['offset'] ?? 0;
+    $startDate = $_GET['start_date'] ?? null;
+    $endDate = $_GET['end_date'] ?? null;
     
     // Get images that have a file path stored
     // Get all detections (with or without images)
@@ -29,13 +31,30 @@ try {
                image_base64, image_mime_type, image_path, detected_at, crop_type 
         FROM weed_detections 
         WHERE user_id = :user_id
-        ORDER BY detected_at DESC LIMIT :limit OFFSET :offset
     ";
+    
+    // Add date filtering if provided
+    if ($startDate) {
+        $query .= " AND DATE(detected_at) >= :start_date";
+    }
+    if ($endDate) {
+        $query .= " AND DATE(detected_at) <= :end_date";
+    }
+    
+    $query .= " ORDER BY detected_at DESC LIMIT :limit OFFSET :offset";
     
     $stmt = $db->prepare($query);
     $stmt->bindParam(':user_id', $tokenData['userId'], PDO::PARAM_INT);
     $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+    
+    if ($startDate) {
+        $stmt->bindParam(':start_date', $startDate, PDO::PARAM_STR);
+    }
+    if ($endDate) {
+        $stmt->bindParam(':end_date', $endDate, PDO::PARAM_STR);
+    }
+    
     $stmt->execute();
     
     $images = $stmt->fetchAll();

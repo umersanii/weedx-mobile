@@ -30,10 +30,15 @@ class GalleryViewModel @Inject constructor(
         loadGalleryImages()
     }
 
-    fun loadGalleryImages(offset: Int? = null, limit: Int? = null) {
+    fun loadGalleryImages(
+        offset: Int? = null, 
+        limit: Int? = null,
+        startDate: String? = null,
+        endDate: String? = null
+    ) {
         viewModelScope.launch {
             _uiState.value = GalleryUiState.Loading
-            when (val result = galleryRepository.getGalleryImages(offset, limit)) {
+            when (val result = galleryRepository.getGalleryImages(offset, limit, startDate, endDate)) {
                 is NetworkResult.Success -> {
                     _uiState.value = GalleryUiState.Success(result.data)
                 }
