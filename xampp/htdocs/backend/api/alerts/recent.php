@@ -35,7 +35,7 @@ try {
             'type' => $alert['type'],
             'severity' => $alert['severity'],
             'message' => $alert['message'],
-            'read' => (bool)$alert['is_read'],
+            'is_read' => (bool)$alert['is_read'],
             'timestamp' => $alert['created_at']
         ];
     }, $alerts);

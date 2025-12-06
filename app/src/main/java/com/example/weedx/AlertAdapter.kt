@@ -70,16 +70,42 @@ class AlertAdapter(
     
     private fun formatTimeAgo(timestamp: String): String {
         return try {
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            val date = dateFormat.parse(timestamp) ?: return timestamp
+            // Try multiple date formats to handle various timestamp formats
+            val formats = listOf(
+                SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()),
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()),
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault()),
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).apply {
+                    timeZone = TimeZone.getTimeZone("UTC")
+                }
+            )
+            
+            var date: Date? = null
+            for (format in formats) {
+                try {
+                    date = format.parse(timestamp)
+                    if (date != null) break
+                } catch (e: Exception) {
+                    // Try next format
+                }
+            }
+            
+            if (date == null) return timestamp
+            
             val now = Date()
             val diff = now.time - date.time
             
             when {
+                diff < 0 -> "Just now" // Handle future timestamps
                 diff < TimeUnit.MINUTES.toMillis(1) -> "Just now"
                 diff < TimeUnit.HOURS.toMillis(1) -> "${TimeUnit.MILLISECONDS.toMinutes(diff)}m ago"
                 diff < TimeUnit.DAYS.toMillis(1) -> "${TimeUnit.MILLISECONDS.toHours(diff)}h ago"
-                else -> "${TimeUnit.MILLISECONDS.toDays(diff)}d ago"
+                diff < TimeUnit.DAYS.toMillis(7) -> "${TimeUnit.MILLISECONDS.toDays(diff)}d ago"
+                else -> {
+                    // For older dates, show formatted date
+                    val displayFormat = SimpleDateFormat("MMM d", Locale.getDefault())
+                    displayFormat.format(date)
+                }
             }
         } catch (e: Exception) {
             timestamp

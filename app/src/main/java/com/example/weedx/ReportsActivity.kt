@@ -363,37 +363,114 @@ class ReportsActivity : AppCompatActivity() {
     }
 
     private fun convertHtmlToPdf(htmlContent: String, filename: String) {
-        val webView = WebView(this)
-        webView.settings.javaScriptEnabled = false
-        
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    webView.createPrintDocumentAdapter(filename)?.let { adapter ->
-                        // Create PDF using print adapter
-                        val pdfDocument = PdfDocument()
-                        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 size
-                        val page = pdfDocument.startPage(pageInfo)
-                        
-                        webView.draw(page.canvas)
-                        pdfDocument.finishPage(page)
-                        
-                        // Save to file
-                        try {
-                            val pdfBytes = java.io.ByteArrayOutputStream()
-                            pdfDocument.writeTo(pdfBytes)
-                            pdfDocument.close()
+        try {
+            val pdfDocument = PdfDocument()
+            val pageWidth = 595 // A4 width in points
+            val pageHeight = 842 // A4 height in points
+            
+            var pageNumber = 1
+            var pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
+            var page = pdfDocument.startPage(pageInfo)
+            var canvas = page.canvas
+            val paint = Paint()
+            
+            // Draw title
+            paint.textSize = 24f
+            paint.color = android.graphics.Color.parseColor("#2d5016")
+            paint.isFakeBoldText = true
+            canvas.drawText("WeedX Detection Report", 50f, 50f, paint)
+            
+            // Draw timestamp
+            paint.textSize = 12f
+            paint.color = android.graphics.Color.GRAY
+            paint.isFakeBoldText = false
+            val dateStr = java.text.SimpleDateFormat("MMM dd, yyyy HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+            canvas.drawText("Generated: $dateStr", 50f, 80f, paint)
+            
+            // Draw table header
+            var yPos = 120f
+            paint.textSize = 10f
+            paint.color = android.graphics.Color.BLACK
+            paint.isFakeBoldText = true
+            
+            canvas.drawText("ID", 50f, yPos, paint)
+            canvas.drawText("Weed Type", 90f, yPos, paint)
+            canvas.drawText("Crop", 200f, yPos, paint)
+            canvas.drawText("Conf.", 280f, yPos, paint)
+            canvas.drawText("Treated", 340f, yPos, paint)
+            canvas.drawText("Date", 420f, yPos, paint)
+            
+            // Draw line under header
+            yPos += 5f
+            paint.strokeWidth = 2f
+            canvas.drawLine(50f, yPos, pageWidth - 50f, yPos, paint)
+            yPos += 15f
+            
+            // Parse HTML to extract table data
+            paint.isFakeBoldText = false
+            paint.textSize = 9f
+            paint.strokeWidth = 1f
+            
+            val rows = htmlContent.split("<tr>").drop(2) // Skip header rows
+            
+            for (row in rows) {
+                if (row.contains("</tr>") && row.contains("<td>")) {
+                    val cells = row.split("<td>")
+                        .filter { it.contains("</td>") }
+                        .map { it.substringBefore("</td>").replace("&nbsp;", " ").trim() }
+                    
+                    if (cells.size >= 7) {
+                        // Check if we need a new page
+                        if (yPos > pageHeight - 50) {
+                            pdfDocument.finishPage(page)
+                            pageNumber++
+                            pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
+                            page = pdfDocument.startPage(pageInfo)
+                            canvas = page.canvas
+                            yPos = 50f
                             
-                            saveFileToDownloads(pdfBytes.toByteArray(), filename, "application/pdf")
-                        } catch (e: Exception) {
-                            Toast.makeText(this@ReportsActivity, "PDF generation failed: ${e.message}", Toast.LENGTH_LONG).show()
+                            // Redraw header on new page
+                            paint.isFakeBoldText = true
+                            canvas.drawText("ID", 50f, yPos, paint)
+                            canvas.drawText("Weed Type", 90f, yPos, paint)
+                            canvas.drawText("Crop", 200f, yPos, paint)
+                            canvas.drawText("Conf.", 280f, yPos, paint)
+                            canvas.drawText("Treated", 340f, yPos, paint)
+                            canvas.drawText("Date", 420f, yPos, paint)
+                            yPos += 5f
+                            canvas.drawLine(50f, yPos, pageWidth - 50f, yPos, paint)
+                            yPos += 15f
+                            paint.isFakeBoldText = false
                         }
+                        
+                        canvas.drawText(cells[0], 50f, yPos, paint) // ID
+                        canvas.drawText(cells[1].take(14), 90f, yPos, paint) // Weed Type
+                        canvas.drawText(cells[2].take(10), 200f, yPos, paint) // Crop
+                        canvas.drawText(cells[3], 280f, yPos, paint) // Confidence
+                        canvas.drawText(cells[5], 340f, yPos, paint) // Treated
+                        canvas.drawText(cells[6].take(19), 420f, yPos, paint) // Date
+                        
+                        yPos += 20f
                     }
                 }
             }
+            
+            // Footer
+            paint.textSize = 10f
+            paint.color = android.graphics.Color.LTGRAY
+            canvas.drawText("WeedX - Precision Farming Report", 50f, pageHeight - 30f, paint)
+            
+            pdfDocument.finishPage(page)
+            
+            // Save PDF
+            val pdfBytes = java.io.ByteArrayOutputStream()
+            pdfDocument.writeTo(pdfBytes)
+            pdfDocument.close()
+            
+            saveFileToDownloads(pdfBytes.toByteArray(), filename, "application/pdf")
+        } catch (e: Exception) {
+            Toast.makeText(this, "PDF generation failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
-        
-        webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
     }
 
     private fun setupBottomNavigation() {
