@@ -123,6 +123,126 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Farm Information Section Header -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Farm Information"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Update your farm details"
+                android:textSize="14sp"
+                android:textColor="@color/gray_text" />
+
+            <!-- Farm Name Field -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/farmNameInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="Farm Name"
+                app:startIconDrawable="@drawable/ic_farm"
+                app:startIconTint="@color/green_primary"
+                app:boxBackgroundColor="@color/white"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/green_primary"
+                app:hintTextColor="@color/green_primary"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/farmNameInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Farm Location Field -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/farmLocationInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="Farm Location"
+                app:startIconDrawable="@drawable/ic_location"
+                app:startIconTint="@color/green_primary"
+                app:boxBackgroundColor="@color/white"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/green_primary"
+                app:hintTextColor="@color/green_primary"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/farmLocationInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Farm Size Field -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/farmSizeInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="Farm Size (hectares)"
+                app:startIconDrawable="@drawable/ic_area"
+                app:startIconTint="@color/green_primary"
+                app:suffixText="ha"
+                app:boxBackgroundColor="@color/white"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/green_primary"
+                app:hintTextColor="@color/green_primary"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/farmSizeInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Crop Types Field -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/cropTypesInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="Crop Types (Optional)"
+                app:startIconDrawable="@drawable/ic_crop"
+                app:startIconTint="@color/green_primary"
+                app:helperText="e.g., Wheat, Corn, Soybean"
+                app:boxBackgroundColor="@color/white"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/green_primary"
+                app:hintTextColor="@color/green_primary"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/cropTypesInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
             <!-- Save Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveButton"

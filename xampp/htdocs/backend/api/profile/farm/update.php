@@ -73,8 +73,23 @@ try {
         }
         
         if ($stmt->execute()) {
+            // Fetch updated farm data
+            $farmQuery = "SELECT * FROM farms WHERE user_id = :user_id";
+            $farmStmt = $db->prepare($farmQuery);
+            $farmStmt->bindParam(':user_id', $userId);
+            $farmStmt->execute();
+            $farm = $farmStmt->fetch();
+            
+            $response = [
+                'id' => (int)$farm['id'],
+                'name' => $farm['name'],
+                'location' => $farm['location'],
+                'size' => (float)$farm['size'],
+                'crop_types' => $farm['crop_types']
+            ];
+            
             Logger::logSuccess('/api/profile/farm', 'Farm info updated for user ID: ' . $userId);
-            Response::success(null, 'Farm info updated successfully');
+            Response::success($response, 'Farm info updated successfully');
         } else {
             Logger::logError('/api/profile/farm', 'Failed to update farm info', 500);
             Response::error('Failed to update farm info', 500);
@@ -94,8 +109,25 @@ try {
         $stmt->bindParam(':crop_types', $cropTypes);
         
         if ($stmt->execute()) {
+            $farmId = (int)$db->lastInsertId();
+            
+            // Fetch the created farm data
+            $farmQuery = "SELECT * FROM farms WHERE id = :id";
+            $farmStmt = $db->prepare($farmQuery);
+            $farmStmt->bindParam(':id', $farmId);
+            $farmStmt->execute();
+            $farm = $farmStmt->fetch();
+            
+            $response = [
+                'id' => (int)$farm['id'],
+                'name' => $farm['name'],
+                'location' => $farm['location'],
+                'size' => (float)$farm['size'],
+                'crop_types' => $farm['crop_types']
+            ];
+            
             Logger::logSuccess('/api/profile/farm', 'Farm created for user ID: ' . $userId);
-            Response::success(['id' => (int)$db->lastInsertId()], 'Farm created successfully', 201);
+            Response::success($response, 'Farm created successfully', 201);
         } else {
             Logger::logError('/api/profile/farm', 'Failed to create farm', 500);
             Response::error('Failed to create farm', 500);

@@ -24,6 +24,9 @@ class ProfileViewModel @Inject constructor(
     private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
     val updateState: StateFlow<UpdateState> = _updateState
     
+    private val _farmUpdateState = MutableStateFlow<FarmUpdateState>(FarmUpdateState.Idle)
+    val farmUpdateState: StateFlow<FarmUpdateState> = _farmUpdateState
+    
     fun loadProfile() {
         viewModelScope.launch {
             try {
@@ -70,6 +73,30 @@ class ProfileViewModel @Inject constructor(
         }
     }
     
+    fun updateFarmInfo(updates: Map<String, Any>) {
+        viewModelScope.launch {
+            try {
+                _farmUpdateState.value = FarmUpdateState.Loading
+                
+                when (val result = profileRepository.updateFarmInfo(updates)) {
+                    is NetworkResult.Success -> {
+                        _farmUpdateState.value = FarmUpdateState.Success(result.data)
+                        // Refresh profile after successful update
+                        loadProfile()
+                    }
+                    is NetworkResult.Error -> {
+                        _farmUpdateState.value = FarmUpdateState.Error(result.message)
+                    }
+                    is NetworkResult.Loading -> {
+                        _farmUpdateState.value = FarmUpdateState.Loading
+                    }
+                }
+            } catch (e: Exception) {
+                _farmUpdateState.value = FarmUpdateState.Error(e.localizedMessage ?: "Unknown error")
+            }
+        }
+    }
+    
     fun refresh() {
         loadProfile()
     }
@@ -86,6 +113,13 @@ class ProfileViewModel @Inject constructor(
         object Loading : UpdateState()
         data class Success(val data: UserProfile) : UpdateState()
         data class Error(val message: String) : UpdateState()
+    }
+    
+    sealed class FarmUpdateState {
+        object Idle : FarmUpdateState()
+        object Loading : FarmUpdateState()
+        data class Success(val data: FarmInfo) : FarmUpdateState()
+        data class Error(val message: String) : FarmUpdateState()
     }
     
     companion object {

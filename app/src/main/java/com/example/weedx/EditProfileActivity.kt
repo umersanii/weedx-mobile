@@ -10,6 +10,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.weedx.data.models.response.FarmInfo
 import com.example.weedx.data.models.response.UserProfile
 import com.example.weedx.presentation.viewmodels.ProfileViewModel
 import com.google.android.material.appbar.MaterialToolbar
@@ -27,11 +28,16 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var nameInput: TextInputEditText
     private lateinit var emailInput: TextInputEditText
     private lateinit var phoneInput: TextInputEditText
+    private lateinit var farmNameInput: TextInputEditText
+    private lateinit var farmLocationInput: TextInputEditText
+    private lateinit var farmSizeInput: TextInputEditText
+    private lateinit var cropTypesInput: TextInputEditText
     private lateinit var saveButton: MaterialButton
     private lateinit var cancelButton: MaterialButton
     private lateinit var loadingIndicator: ProgressBar
 
     private var currentUser: UserProfile? = null
+    private var currentFarm: FarmInfo? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +68,10 @@ class EditProfileActivity : AppCompatActivity() {
         nameInput = findViewById(R.id.nameInput)
         emailInput = findViewById(R.id.emailInput)
         phoneInput = findViewById(R.id.phoneInput)
+        farmNameInput = findViewById(R.id.farmNameInput)
+        farmLocationInput = findViewById(R.id.farmLocationInput)
+        farmSizeInput = findViewById(R.id.farmSizeInput)
+        cropTypesInput = findViewById(R.id.cropTypesInput)
         saveButton = findViewById(R.id.saveButton)
         cancelButton = findViewById(R.id.cancelButton)
         loadingIndicator = findViewById(R.id.loadingIndicator)
@@ -87,7 +97,8 @@ class EditProfileActivity : AppCompatActivity() {
                 when (state) {
                     is ProfileViewModel.ProfileState.Success -> {
                         currentUser = state.data.user
-                        populateFields(state.data.user)
+                        currentFarm = state.data.farm
+                        populateFields(state.data.user, state.data.farm)
                     }
                     is ProfileViewModel.ProfileState.Error -> {
                         Toast.makeText(
@@ -113,14 +124,8 @@ class EditProfileActivity : AppCompatActivity() {
                         showLoading(true)
                     }
                     is ProfileViewModel.UpdateState.Success -> {
-                        showLoading(false)
-                        Toast.makeText(
-                            this@EditProfileActivity,
-                            "Profile updated successfully",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        setResult(RESULT_OK)
-                        finish()
+                        // Check if farm update is also complete
+                        checkAndFinish()
                     }
                     is ProfileViewModel.UpdateState.Error -> {
                         showLoading(false)
@@ -133,20 +138,68 @@ class EditProfileActivity : AppCompatActivity() {
                 }
             }
         }
+        
+        lifecycleScope.launch {
+            viewModel.farmUpdateState.collect { state ->
+                when (state) {
+                    is ProfileViewModel.FarmUpdateState.Success -> {
+                        // Check if user update is also complete
+                        checkAndFinish()
+                    }
+                    is ProfileViewModel.FarmUpdateState.Error -> {
+                        showLoading(false)
+                        Toast.makeText(
+                            this@EditProfileActivity,
+                            "Farm: ${state.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+    
+    private fun checkAndFinish() {
+        val userState = viewModel.updateState.value
+        val farmState = viewModel.farmUpdateState.value
+        
+        if (userState is ProfileViewModel.UpdateState.Success && 
+            (farmState is ProfileViewModel.FarmUpdateState.Success || farmState is ProfileViewModel.FarmUpdateState.Idle)) {
+            showLoading(false)
+            Toast.makeText(
+                this@EditProfileActivity,
+                "Profile updated successfully",
+                Toast.LENGTH_SHORT
+            ).show()
+            setResult(RESULT_OK)
+            finish()
+        }
     }
 
-    private fun populateFields(user: UserProfile) {
+    private fun populateFields(user: UserProfile, farm: FarmInfo?) {
         nameInput.setText(user.name)
         emailInput.setText(user.email)
         phoneInput.setText(user.phone ?: "")
+        
+        farm?.let {
+            farmNameInput.setText(it.name)
+            farmLocationInput.setText(it.location ?: "")
+            farmSizeInput.setText(it.area?.toString() ?: "")
+            cropTypesInput.setText(it.cropTypes ?: "")
+        }
     }
 
     private fun saveProfileChanges() {
         val name = nameInput.text.toString().trim()
         val email = emailInput.text.toString().trim()
         val phone = phoneInput.text.toString().trim()
+        val farmName = farmNameInput.text.toString().trim()
+        val farmLocation = farmLocationInput.text.toString().trim()
+        val farmSize = farmSizeInput.text.toString().trim()
+        val cropTypes = cropTypesInput.text.toString().trim()
 
-        // Validation
+        // Validation - User fields
         if (name.isEmpty()) {
             nameInput.error = "Name is required"
             nameInput.requestFocus()
@@ -165,18 +218,56 @@ class EditProfileActivity : AppCompatActivity() {
             return
         }
 
-        // Build update map
-        val updates = mutableMapOf<String, Any>(
+        // Build user update map
+        val userUpdates = mutableMapOf<String, Any>(
             "name" to name,
             "email" to email
         )
 
         if (phone.isNotEmpty()) {
-            updates["phone"] = phone
+            userUpdates["phone"] = phone
         }
 
         // Call ViewModel to update profile
-        viewModel.updateProfile(updates)
+        viewModel.updateProfile(userUpdates)
+        
+        // Update farm if fields are provided
+        if (farmName.isNotEmpty() || farmLocation.isNotEmpty() || farmSize.isNotEmpty()) {
+            val farmUpdates = mutableMapOf<String, Any>()
+            
+            if (farmName.isNotEmpty()) {
+                farmUpdates["name"] = farmName
+            }
+            
+            if (farmLocation.isNotEmpty()) {
+                farmUpdates["location"] = farmLocation
+            }
+            
+            if (farmSize.isNotEmpty()) {
+                try {
+                    val size = farmSize.toDouble()
+                    if (size > 0) {
+                        farmUpdates["size"] = size
+                    } else {
+                        farmSizeInput.error = "Size must be positive"
+                        farmSizeInput.requestFocus()
+                        return
+                    }
+                } catch (e: NumberFormatException) {
+                    farmSizeInput.error = "Invalid number"
+                    farmSizeInput.requestFocus()
+                    return
+                }
+            }
+            
+            if (cropTypes.isNotEmpty()) {
+                farmUpdates["crop_types"] = cropTypes
+            }
+            
+            if (farmUpdates.isNotEmpty()) {
+                viewModel.updateFarmInfo(farmUpdates)
+            }
+        }
     }
 
     private fun showLoading(isLoading: Boolean) {
@@ -186,6 +277,10 @@ class EditProfileActivity : AppCompatActivity() {
         nameInput.isEnabled = !isLoading
         emailInput.isEnabled = !isLoading
         phoneInput.isEnabled = !isLoading
+        farmNameInput.isEnabled = !isLoading
+        farmLocationInput.isEnabled = !isLoading
+        farmSizeInput.isEnabled = !isLoading
+        cropTypesInput.isEnabled = !isLoading
     }
 
     companion object {
