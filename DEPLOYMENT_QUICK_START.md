@@ -10,11 +10,17 @@ The backend is already running on your Pi!
 - **URL**: `http://raspberrypi.mullet-bull.ts.net/weedx-backend/`
 - **Location**: `/var/www/html/weedx-backend/`
 - **Database**: MySQL with 12 tables
-- **Status**: All 30+ endpoints working
+- **Status**: All 51+ endpoints working
+- **Features**: JWT auth, MQTT integration, Firebase push notifications
 
 ### Update Backend (if needed)
 ```bash
-./scripts/deploy-to-pi.sh
+# Deploy backend files
+bash scripts/deploy-backend.sh
+
+# Restart services
+sudo systemctl restart apache2
+sudo systemctl restart weedx-mqtt
 ```
 
 ### Test Backend

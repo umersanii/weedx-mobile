@@ -8,11 +8,12 @@ This document consolidates all guides for the WeedX project including backend se
 
 1. [Backend Summary](#backend-summary)
 2. [Tailscale Deployment](#tailscale-deployment)
-3. [Database Guide](#database-guide)
-4. [Image Handling](#image-handling)
-5. [Image Upload Guide](#image-upload-guide)
-6. [Implementation Status](#implementation-status)
-7. [Use Case Flows](#use-case-flows)
+3. [Firebase Push Notifications](#firebase-push-notifications)
+4. [Database Guide](#database-guide)
+5. [Image Handling](#image-handling)
+6. [Image Upload Guide](#image-upload-guide)
+7. [Implementation Status](#implementation-status)
+8. [Use Case Flows](#use-case-flows)
 
 ---
 
@@ -277,6 +278,101 @@ mysql -u weedx_user -pweedx_pass_2024 weedx -e "SELECT 1;"
 sudo systemctl enable apache2
 sudo systemctl enable mariadb
 ```
+
+---
+
+# Firebase Push Notifications
+
+**Status**: ✅ **OPERATIONAL**
+
+The WeedX system supports Firebase Cloud Messaging (FCM) for real-time alerts. When the robot publishes alerts to `weedx/alert` MQTT topic, the backend automatically sends push notifications to user devices.
+
+## Quick Setup
+
+### 1. Backend Setup
+
+Install Firebase Admin SDK in **production** directory:
+
+```bash
+cd /var/www/html/weedx-backend
+sudo composer require kreait/firebase-php
+```
+
+### 2. Firebase Service Account
+
+1. Go to Firebase Console → Project Settings → Service Accounts
+2. Click "Generate New Private Key" → Save JSON
+3. Upload to: `/var/www/html/weedx-backend/config/firebase-service-account.json`
+4. Set permissions:
+   ```bash
+   sudo chown www-data:www-data /var/www/html/weedx-backend/config/firebase-service-account.json
+   sudo chmod 600 /var/www/html/weedx-backend/config/firebase-service-account.json
+   ```
+
+### 3. Sync to Source & Restart Services
+
+```bash
+# Sync composer files to Git repo
+cd /var/www/html/weedx-backend
+sudo cp composer.json composer.lock /home/umersani/weedx-mobile/xampp/htdocs/backend/
+sudo chown umersani:umersani /home/umersani/weedx-mobile/xampp/htdocs/backend/composer.*
+
+# Restart services to load Firebase SDK
+sudo systemctl restart apache2
+sudo systemctl restart weedx-mqtt
+```
+
+Verify: `sudo journalctl -u weedx-mqtt -f` should show "Firebase notification service initialized"
+
+## How It Works
+
+```
+Robot → MQTT (weedx/alert) → PHP Subscriber → MySQL + Firebase FCM → Android App
+```
+
+1. Robot publishes alert to MQTT
+2. PHP subscriber saves to database
+3. Firebase sends push notification to user's device(s)
+4. App displays notification
+
+## Testing
+
+Publish a test alert:
+
+```bash
+mosquitto_pub -h localhost -p 1883 -t "weedx/alert" -m '{
+    "user_id": 1,
+    "type": "battery",
+    "severity": "warning",
+    "message": "Battery level at 20%. Please charge soon."
+}'
+```
+
+Check logs: `sudo journalctl -u weedx-mqtt -f`  
+You should see: "Push notification sent to user 1"
+
+## Alert Types
+
+| Type | Severity | Example |
+|------|----------|---------|
+| `battery` | warning/critical | Low battery alerts |
+| `fault` | critical | System malfunctions |
+| `maintenance` | warning | Scheduled maintenance |
+| `detection` | info | Weed detections |
+
+## Troubleshooting
+
+**No notifications received?**
+
+1. Check Firebase initialized: `sudo journalctl -u weedx-mqtt -n 20`
+2. Verify SDK installed: `ls /var/www/html/weedx-backend/vendor/kreait/`
+3. Check FCM tokens registered: `SELECT * FROM fcm_tokens WHERE active = 1;`
+4. Restart services if installed SDK after they were running
+
+**FCM token registration fails?**
+
+- Check Apache logs: `sudo tail -50 /var/log/apache2/error.log | grep -i firebase`
+- Error "Class not found" → Firebase SDK not installed or Apache not restarted
 
 ---
 
@@ -545,7 +641,7 @@ mysql -u root -p weedx -e "SELECT COUNT(*) FROM weed_detections WHERE image_base
 
 ## Completed
 
-- ✅ Firebase Push Notifications (FCM) - See [FIREBASE_PUSH_NOTIFICATIONS.md](FIREBASE_PUSH_NOTIFICATIONS.md)
+- ✅ Firebase Push Notifications (FCM) - Integrated in guide
 - ✅ MQTT Integration with Firebase Notifications for Alerts
 
 ## Pending

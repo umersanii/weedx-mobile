@@ -17,6 +17,7 @@
 - **🖼️ Image Gallery**: Browse and manage weed detection photos
 - **💬 Assistant**: AI chatbot for farming advice
 - **👤 Profile**: Manage user and farm information
+- **🔔 Push Notifications**: Real-time alerts via Firebase Cloud Messaging
 
 ---
 
@@ -40,17 +41,20 @@
 ## 📐 Architecture
 
 ```
-Robot/Script → MQTT → PHP Subscriber → MySQL → REST API → Android App
+Robot/Script → MQTT → PHP Subscriber → MySQL + Firebase FCM → REST API → Android App
+                                              ↓
+                                    Push Notifications
 ```
 
 ### System Flow
 
 1. **Robot/Script** publishes JSON to MQTT topics
 2. **MQTT Subscriber** (`weedx-mqtt.service`) listens and auto-saves to MySQL
-3. **REST API** provides data to Android app
-4. **Android App** displays dashboards and analytics
+3. **Firebase Notifications** sent for critical alerts (battery, faults, detections)
+4. **REST API** provides data to Android app
+5. **Android App** displays dashboards, analytics, and receives push notifications
 
-📖 **Documentation**: [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) | [docs/architecture.md](docs/architecture.md)
+📖 **Documentation**: [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) | [docs/architecture.md](docs/architecture.md) | [docs/guide.md#firebase-push-notifications](docs/guide.md#firebase-push-notifications)
 
 ---
 
@@ -94,8 +98,10 @@ docs/
 
 2. **Configure Firebase**
    - Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
-   - Download `google-services.json`
-   - Place it in `app/google-services.json`
+   - Enable Firebase Authentication and Cloud Messaging
+   - Download `google-services.json` and place in `app/google-services.json`
+   - Download service account key and place in backend: `/var/www/html/weedx-backend/config/firebase-service-account.json`
+   - See [docs/guide.md#firebase-push-notifications](docs/guide.md#firebase-push-notifications) for full setup
 
 3. **Configure Backend URL**
    
@@ -111,8 +117,17 @@ docs/
 
 5. **Deploy Backend** (if running on Pi)
    ```bash
+   # Install Firebase Admin SDK (one-time setup)
+   cd /var/www/html/weedx-backend
+   sudo composer require kreait/firebase-php
+   
+   # Deploy and setup services
    bash scripts/deploy-backend.sh
    bash scripts/setup-mqtt.sh
+   
+   # Restart services to load Firebase
+   sudo systemctl restart apache2
+   sudo systemctl restart weedx-mqtt
    ```
 
 ---
@@ -135,13 +150,15 @@ docs/
 
 ## 🔌 MQTT Integration
 
-**Robot → MQTT → Subscriber → MySQL → API → App**
+**Robot → MQTT → Subscriber → MySQL + Firebase → API + Push Notifications → App**
 
 The system uses MQTT for real-time data ingestion:
 
-1. Robot publishes to topics (status, location, detections, soil)
+1. Robot publishes to topics (status, location, detections, soil, **alerts**)
 2. PHP subscriber (`weedx-mqtt.service`) auto-saves to MySQL
-3. REST API serves data to Android app
+3. **Critical alerts trigger Firebase push notifications** to user devices
+4. REST API serves data to Android app
+5. App receives real-time push notifications for alerts
 
 ### Publish Test Data
 
@@ -149,14 +166,23 @@ The system uses MQTT for real-time data ingestion:
 # Single message
 bash scripts/mqtt-publisher.sh weed
 
+# Test alert with push notification
+mosquitto_pub -h localhost -p 1883 -t "weedx/alert" -m '{
+    "user_id": 1,
+    "type": "battery",
+    "severity": "warning",
+    "message": "Battery level at 20%. Please charge soon."
+}'
+
 # Batch test
 bash scripts/mqtt-publisher.sh batch
 
-# Monitor logs
+# Monitor logs (watch for "Push notification sent")
 sudo journalctl -u weedx-mqtt -f
 ```
 
 📖 See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) for full MQTT setup.
+📖 See [docs/guide.md#firebase-push-notifications](docs/guide.md#firebase-push-notifications) for push notification setup.
 
 ---
 
@@ -216,6 +242,7 @@ See [gradle/libs.versions.toml](gradle/libs.versions.toml) for full list.
 - [x] Backend deployed on Raspberry Pi via Tailscale
 - [x] 51+ backend API endpoints with JWT auth
 - [x] MQTT integration for real-time data
+- [x] Firebase push notifications for alerts
 - [x] Android project with Hilt DI
 - [x] All 13 Activity screens
 - [x] Complete data layer (API + repositories)
