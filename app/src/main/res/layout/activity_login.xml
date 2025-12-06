@@ -27,10 +27,11 @@
 
             <ImageView
                 android:id="@+id/logoImage"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_leaf"
+                android:src="@drawable/logo"
+                android:scaleType="centerInside"
                 android:contentDescription="@string/app_name" />
 
         </androidx.cardview.widget.CardView>

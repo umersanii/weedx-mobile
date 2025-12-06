@@ -29,7 +29,7 @@
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_leaf"
+            android:src="@drawable/logo"
             app:tint="@color/green_icon"
             android:contentDescription="Weed icon" />
 

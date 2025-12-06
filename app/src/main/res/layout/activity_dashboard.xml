@@ -162,7 +162,7 @@
                         <ImageView
                             android:layout_width="28dp"
                             android:layout_height="28dp"
-                            android:src="@drawable/ic_leaf"
+                            android:src="@drawable/logo"
                             app:tint="@color/green_primary"
                             android:contentDescription="Weed Logs" />
 
@@ -471,7 +471,7 @@
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_gravity="center"
-                                    android:src="@drawable/ic_leaf"
+                                    android:src="@drawable/logo"
                                     android:contentDescription="Weeds" />
 
                             </androidx.cardview.widget.CardView>

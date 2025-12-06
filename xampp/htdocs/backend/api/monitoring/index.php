@@ -21,6 +21,20 @@ try {
     $metricsQuery = "SELECT * FROM robot_status ORDER BY updated_at DESC LIMIT 1";
     $metrics = $db->query($metricsQuery)->fetch();
     
+    // Check if robot status is stale (no updates in last 2 minutes)
+    // If stale, override status to 'offline'
+    $actualStatus = $metrics['status'] ?? 'offline';
+    if ($metrics && isset($metrics['updated_at'])) {
+        $lastUpdate = strtotime($metrics['updated_at']);
+        $now = time();
+        $minutesSinceUpdate = ($now - $lastUpdate) / 60;
+        
+        // If no update in 2 minutes, mark as offline
+        if ($minutesSinceUpdate > 2) {
+            $actualStatus = 'offline';
+        }
+    }
+    
     // Get activity timeline (last 10 activities)
     $activityQuery = "SELECT * FROM robot_activity_log ORDER BY timestamp DESC LIMIT 10";
     $activities = $db->query($activityQuery)->fetchAll();
@@ -31,7 +45,7 @@ try {
             'herbicide_level' => (float)($metrics['herbicide_level'] ?? 0),
             'coverage' => (float)($metrics['area_covered_today'] ?? 0),
             'efficiency' => (float)($metrics['efficiency'] ?? 0),
-            'status' => $metrics['status'] ?? 'offline',
+            'status' => $actualStatus,
             'speed' => (float)($metrics['speed'] ?? 0),
             'heading' => (float)($metrics['heading'] ?? 0),
             'activity' => $metrics['activity'] ?? null
