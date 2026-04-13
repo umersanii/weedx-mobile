@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.animation.AnimationUtils
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -20,6 +22,10 @@ import com.example.weedx.presentation.viewmodels.DashboardViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -31,7 +37,6 @@ class DashboardActivity : AppCompatActivity() {
     lateinit var fcmTokenRepository: FcmTokenRepository
     
     private lateinit var bottomNavigation: BottomNavigationView
-    private lateinit var liveCard: CardView
     private lateinit var weatherQuickCard: CardView
     private lateinit var weedLogsQuickCard: CardView
     private lateinit var weedsDetectedValue: TextView
@@ -48,7 +53,10 @@ class DashboardActivity : AppCompatActivity() {
     // Quick card values
     private lateinit var weatherTempValue: TextView
     private lateinit var totalWeedsValue: TextView
-    private lateinit var robotStatusQuickValue: TextView
+
+    // MQTT status badge
+    private lateinit var mqttStatusDot: View
+    private lateinit var mqttStatusText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,7 +75,6 @@ class DashboardActivity : AppCompatActivity() {
 
         // Initialize views
         bottomNavigation = findViewById(R.id.bottomNavigation)
-        liveCard = findViewById(R.id.liveCard)
         weatherQuickCard = findViewById(R.id.weatherQuickCard)
         weedLogsQuickCard = findViewById(R.id.weedLogsQuickCard)
         weedsDetectedValue = findViewById(R.id.weedsDetectedValue)
@@ -81,7 +88,10 @@ class DashboardActivity : AppCompatActivity() {
         // Quick card values
         weatherTempValue = findViewById(R.id.weatherTempValue)
         totalWeedsValue = findViewById(R.id.totalWeedsValue)
-        robotStatusQuickValue = findViewById(R.id.robotStatusQuickValue)
+
+        // MQTT status badge
+        mqttStatusDot = findViewById(R.id.mqttStatusDot)
+        mqttStatusText = findViewById(R.id.mqttStatusText)
 
         // Setup alerts RecyclerView
         setupAlertsRecyclerView()
@@ -102,6 +112,14 @@ class DashboardActivity : AppCompatActivity() {
         viewModel.loadDashboardData()
         viewModel.loadAlerts()
         viewModel.loadWeather()
+
+        // Entrance animation
+        animateContentEntrance()
+    }
+
+    private fun animateContentEntrance() {
+        val slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up_fade_in)
+        findViewById<ScrollView>(R.id.scrollView)?.startAnimation(slideUp)
     }
     
     private fun setupAlertsRecyclerView() {
@@ -203,24 +221,38 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
     
+    private fun updateMqttStatusBadge(lastUpdated: String?) {
+        val connected = try {
+            if (lastUpdated.isNullOrBlank()) {
+                false
+            } else {
+                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val updated = sdf.parse(lastUpdated) ?: Date(0)
+                val ageMs = System.currentTimeMillis() - updated.time
+                TimeUnit.MILLISECONDS.toSeconds(ageMs) <= 120
+            }
+        } catch (e: Exception) {
+            false
+        }
+
+        val dotColor = if (connected) getColor(R.color.green_primary) else getColor(R.color.red_primary)
+        val label = if (connected) "MQTT Connected" else "MQTT Offline"
+        val textColor = if (connected) getColor(R.color.green_primary) else getColor(R.color.red_primary)
+
+        mqttStatusDot.backgroundTintList = android.content.res.ColorStateList.valueOf(dotColor)
+        mqttStatusText.text = label
+        mqttStatusText.setTextColor(textColor)
+    }
+
     private fun updateDashboardUI(data: com.example.weedx.data.models.response.DashboardResponse) {
         try {
             // Update robot status
             batteryValue.text = if (data.robotStatus.battery >= 0) "${data.robotStatus.battery}%" else "--"
             locationValue.text = data.robotStatus.status.ifEmpty { "--" }
             speedValue.text = data.robotStatus.speed?.let { String.format("%.1f", it) } ?: "--"
-            
-            // Update quick card for robot status
-            robotStatusQuickValue.text = data.robotStatus.status.ifEmpty { "--" }
-            
-            // Update live card color based on robot status
-            val isActive = data.robotStatus.status.equals("active", ignoreCase = true)
-            val cardColor = if (isActive) {
-                getColor(R.color.green_primary)
-            } else {
-                getColor(R.color.gray_text)
-            }
-            liveCard.setCardBackgroundColor(cardColor)
+
+            // Update MQTT status badge
+            updateMqttStatusBadge(data.robotStatus.lastUpdate)
             
             // Update today's summary
             weedsDetectedValue.text = if (data.todaySummary.weedsDetected >= 0) data.todaySummary.weedsDetected.toString() else "--"
@@ -241,11 +273,12 @@ class DashboardActivity : AppCompatActivity() {
         herbicideUsedValue.text = "--"
         areaCoveredValue.text = "--"
         totalWeedsValue.text = "--"
-        robotStatusQuickValue.text = "--"
         weatherTempValue.text = "--°C"
-        
-        // Reset live card to inactive state
-        liveCard.setCardBackgroundColor(getColor(R.color.gray_text))
+
+        // Reset MQTT badge
+        mqttStatusDot.backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.gray_text))
+        mqttStatusText.text = "MQTT"
+        mqttStatusText.setTextColor(getColor(R.color.gray_text))
     }
     
     private fun updateWeatherUI(weather: com.example.weedx.data.models.response.CurrentWeather) {
@@ -278,30 +311,28 @@ class DashboardActivity : AppCompatActivity() {
         reportsButton.setOnClickListener {
             val intent = Intent(this, ReportsActivity::class.java)
             startActivity(intent)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
-        
-        // Live card click listener
-        liveCard.setOnClickListener {
-            val intent = Intent(this, LiveMonitoringActivity::class.java)
-            startActivity(intent)
-        }
-        
+
         // Weather quick card click listener
         weatherQuickCard.setOnClickListener {
             val intent = Intent(this, WeatherActivity::class.java)
             startActivity(intent)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
-        
+
         // Weed logs quick card click listener
         weedLogsQuickCard.setOnClickListener {
             val intent = Intent(this, WeedLogsActivity::class.java)
             startActivity(intent)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
-        
+
         // Weeds detected card click listener - navigate to weed logs
         findViewById<CardView>(R.id.todaysSummaryCard).setOnClickListener {
             val intent = Intent(this, WeedLogsActivity::class.java)
             startActivity(intent)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
     }
 
@@ -313,27 +344,27 @@ class DashboardActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_weather -> {
-                    // Navigate to weather screen
                     val intent = Intent(this, WeatherActivity::class.java)
                     startActivity(intent)
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     true
                 }
                 R.id.nav_assistant -> {
-                    // Navigate to assistant screen
                     val intent = Intent(this, AssistantActivity::class.java)
                     startActivity(intent)
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     true
                 }
-                R.id.nav_images -> {
-                    // Navigate to image gallery screen
-                    val intent = Intent(this, ImageGalleryActivity::class.java)
+                R.id.nav_weed_logs -> {
+                    val intent = Intent(this, WeedLogsActivity::class.java)
                     startActivity(intent)
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     true
                 }
                 R.id.nav_profile -> {
-                    // Navigate to profile screen
                     val intent = Intent(this, ProfileActivity::class.java)
                     startActivity(intent)
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     true
                 }
                 else -> false

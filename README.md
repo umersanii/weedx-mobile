@@ -112,7 +112,13 @@ docs/
 
 4. **Build & Run**
    ```bash
+   ./gradlew build
    ./gradlew assembleDebug
+   ```
+
+   Or use the project starter script:
+   ```bash
+   bash scripts/start-project.sh all
    ```
 
 5. **Deploy Backend** (if running on Pi)
@@ -292,3 +298,16 @@ For questions or support:
 ---
 
 **🌱 Making farming smarter, one weed at a time.**
+
+
+
+## Memento Mori
+```
+adb uninstall com.example.weedx || true
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb shell monkey -p com.example.weedx -c android.intent.category.LAUNCHER 1
+```
+
+```
+adb logcat -c && adb logcat -v time | grep --line-buffered -E "com.example.weedx|AndroidRuntime|FATAL EXCEPTION|OkHttp|Retrofit|System.err"
+```

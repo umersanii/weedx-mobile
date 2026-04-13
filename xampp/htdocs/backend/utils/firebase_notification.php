@@ -20,7 +20,7 @@ class FirebaseNotificationService {
     public function __construct() {
         try {
             // Initialize Firebase with service account credentials
-            $serviceAccountPath = __DIR__ . '/../config/firebase-service-account.json';
+            $serviceAccountPath = __DIR__ . '/google-services.json';
             
             if (!file_exists($serviceAccountPath)) {
                 error_log("Firebase service account file not found at: {$serviceAccountPath}");

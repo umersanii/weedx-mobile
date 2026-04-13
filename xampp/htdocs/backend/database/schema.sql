@@ -57,6 +57,22 @@ CREATE TABLE user_settings (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
+-- FCM TOKENS
+-- =====================================================
+
+CREATE TABLE fcm_tokens (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    device_info VARCHAR(255) NULL,
+    active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
 -- ROBOT STATUS
 -- =====================================================
 
@@ -250,10 +266,18 @@ CREATE TABLE chat_history (
 -- INSERT SAMPLE DATA
 -- =====================================================
 
--- Demo user (password: admin123)
--- Note: Run this PHP to generate new hash: php -r "echo password_hash('admin123', PASSWORD_BCRYPT);"
+-- Demo users (passwords: admin123 and user1234)
+-- Note: Run this PHP to generate a new hash: php -r "echo password_hash('user1234', PASSWORD_BCRYPT);"
 INSERT INTO users (name, email, password, avatar) VALUES 
-('Admin User', 'admin@weedx.com', '$2y$12$gk6.SpklOUO8Ort6z0oLUuxrhkT2fNyzKwEZhwq5lOEwDEx1d1GaW', NULL);
+('Admin User', 'admin@weedx.com', '$2y$12$gk6.SpklOUO8Ort6z0oLUuxrhkT2fNyzKwEZhwq5lOEwDEx1d1GaW', NULL),
+('Umer Sani', 'iamumersani@gmail.com', '$2y$12$a.87atGh7/avc3KQriY9CedH8UNcqgOfXBQk.H/Q5ZJ8ecCWVe4Ou', NULL);
+
+-- Demo farm and user settings for Umer Sani
+INSERT INTO farms (user_id, name, location, size, crop_types) VALUES
+(2, 'Umer Farm', 'Lahore, Pakistan', 4.25, '["Wheat","Corn"]');
+
+INSERT INTO user_settings (user_id, notifications_enabled, email_alerts, language, theme) VALUES
+(2, TRUE, TRUE, 'en', 'dark');
 
 -- Sample robot status
 INSERT INTO robot_status (status, battery_level, herbicide_level, latitude, longitude, speed, activity, area_covered_today, efficiency) VALUES
@@ -283,18 +307,35 @@ INSERT INTO weather_forecast (forecast_date, temp_high, temp_low, weather_condit
 INSERT INTO soil_data (moisture, temperature, ph, nitrogen, phosphorus, potassium, organic_matter) VALUES
 (45.0, 22.0, 6.5, 50, 30, 40, 3.5);
 
--- Sample weed detections (with file paths - upload actual images separately)
-INSERT INTO weed_detections (user_id, weed_type, crop_type, confidence, latitude, longitude, image_path, detected_at) VALUES
-(1, 'Broadleaf Weed', 'Wheat', 92.5, 31.5204, 74.3587, '/data/images/401262_archlinux_icon.png', NOW()),
-(1, 'Grass Weed', 'Wheat', 88.3, 31.5210, 74.3590, '/data/images/pngegg.png', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
-(1, 'Broadleaf Weed', 'Corn', 95.1, 31.5198, 74.3580, NULL, DATE_SUB(NOW(), INTERVAL 2 HOUR)),
-(1, 'Sedge', 'Wheat', 79.8, 31.5215, 74.3595, NULL, DATE_SUB(NOW(), INTERVAL 3 HOUR));
+-- Sample weed detections for admin and Umer Sani
+INSERT INTO weed_detections (user_id, weed_type, crop_type, confidence, latitude, longitude, image_base64, image_mime_type, treated, detected_at) VALUES
+(1, 'Broadleaf Weed', 'Wheat', 92.5, 31.5204, 74.3587, NULL, NULL, FALSE, NOW()),
+(1, 'Grass Weed', 'Wheat', 88.3, 31.5210, 74.3590, NULL, NULL, TRUE, DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+(1, 'Broadleaf Weed', 'Corn', 95.1, 31.5198, 74.3580, NULL, NULL, FALSE, DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+(1, 'Sedge', 'Wheat', 79.8, 31.5215, 74.3595, NULL, NULL, FALSE, DATE_SUB(NOW(), INTERVAL 3 HOUR)),
+(2, 'Daisy Weed', 'Wheat', 91.2, 31.5208, 74.3592, 'RHVtbXkgZGV0ZWN0aW9uIGltYWdl', 'image/jpeg', FALSE, NOW()),
+(2, 'Crabgrass', 'Corn', 84.4, 31.5212, 74.3583, 'RHVtbXkgZGV0ZWN0aW9uIGltYWdl', 'image/png', TRUE, DATE_SUB(NOW(), INTERVAL 30 MINUTE));
 
--- Sample robot activity
-INSERT INTO robot_activity_log (action, description, status) VALUES
-('Start Session', 'Robot started field scanning operation', 'completed'),
-('Weed Detection', 'Detected broadleaf weed at sector A-12', 'completed'),
-('Herbicide Application', 'Applied herbicide to detected weed', 'completed'),
-('Battery Check', 'Battery level checked: 85%', 'completed');
+-- Sample robot sessions for Umer Sani
+INSERT INTO robot_sessions (user_id, start_time, end_time, area_covered, herbicide_used, weeds_detected, battery_start, battery_end, status, notes) VALUES
+(2, DATE_SUB(NOW(), INTERVAL 4 HOUR), DATE_SUB(NOW(), INTERVAL 1 HOUR), 3.20, 12.5, 18, 95, 60, 'completed', 'Completed morning weeding pass.'),
+(2, DATE_SUB(NOW(), INTERVAL 8 HOUR), DATE_SUB(NOW(), INTERVAL 6 HOUR), 1.10, 4.0, 8, 100, 85, 'completed', 'Afternoon scouting of field perimeter.');
+
+-- Sample robot activity log for Umer Sani
+INSERT INTO robot_activity_log (user_id, action, description, status, metadata) VALUES
+(2, 'Start Session', 'Robot started field scanning operation', 'completed', '{"session":"morning-pass"}'),
+(2, 'Weed Detection', 'Detected daisy weed in north field', 'completed', '{"count":18}'),
+(2, 'Herbicide Application', 'Applied herbicide to detected weeds', 'completed', '{"volume_l":12.5}'),
+(2, 'Battery Check', 'Battery level checked: 60%', 'completed', '{"level":60}');
+
+-- Sample user images for Umer Sani
+INSERT INTO user_images (user_id, title, description, image_base64, image_mime_type, category, metadata) VALUES
+(2, 'Field Scan', 'Drone view of wheat field', 'RHVtbXkgZmlsZSBpbWFnZQ==', 'image/jpeg', 'gallery', '{"source":"drone"}'),
+(2, 'Detected Weed', 'Closeup of detected crabgrass', 'RHVtbXkgZW5jb2RlZCBpbW1hZ2U=', 'image/png', 'weed', '{"confidence":84.4}');
+
+-- Sample chat history for Umer Sani
+INSERT INTO chat_history (user_id, message, is_user) VALUES
+(2, 'Hello WeedX, show me today''s weed detections.', TRUE),
+(2, 'Here are 2 new detections in your wheat and corn fields.', FALSE);
 
 COMMIT;

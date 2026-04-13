@@ -28,7 +28,7 @@ try {
     $days = isset($_GET['days']) ? (int)$_GET['days'] : 7;
     
     // Get user's farm location from database
-    $farmQuery = "SELECT location, country FROM farms WHERE user_id = :userId LIMIT 1";
+    $farmQuery = "SELECT location FROM farms WHERE user_id = :userId LIMIT 1";
     $farmStmt = $db->prepare($farmQuery);
     $farmStmt->execute([':userId' => $userId]);
     $farm = $farmStmt->fetch();

@@ -45,6 +45,6 @@
         android:text="156"
         android:textSize="14sp"
         android:textStyle="bold"
-        android:textColor="@color/black" />
+        android:textColor="@color/text_primary" />
 
 </LinearLayout>

@@ -16,9 +16,9 @@
         android:title="@string/nav_assistant" />
     
     <item
-        android:id="@+id/nav_images"
-        android:icon="@drawable/ic_images"
-        android:title="@string/nav_images" />
+        android:id="@+id/nav_weed_logs"
+        android:icon="@drawable/ic_leaf"
+        android:title="@string/weed_logs" />
     
     <item
         android:id="@+id/nav_profile"

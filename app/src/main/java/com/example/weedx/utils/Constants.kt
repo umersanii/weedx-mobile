@@ -1,14 +1,12 @@
 package com.example.weedx.utils
 
+import com.example.weedx.BuildConfig
+
 object Constants {
-    // PHP Backend URL - Tailscale network
-    // Raspberry Pi: http://raspberrypi.mullet-bull.ts.net/weedx-backend/
-    // Local fallback: http://192.168.1.8/weedx-backend/
-    const val BASE_URL = "http://raspberrypi.mullet-bull.ts.net/weedx-backend/"
-    
-    // Image base URL (without /api suffix for serving static files)
-    const val IMAGE_BASE_URL = "http://raspberrypi.mullet-bull.ts.net/weedx-backend"
-    
+    // Backend API endpoints are configured through Gradle build config fields.
+    const val BASE_URL: String = BuildConfig.BACKEND_BASE_URL
+    const val IMAGE_BASE_URL: String = BuildConfig.IMAGE_BASE_URL
+
     /**
      * Constructs a full image URL from a path.
      * If the path is already a full URL, returns it as-is.

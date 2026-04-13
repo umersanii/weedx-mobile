@@ -22,7 +22,7 @@
             android:scaleType="centerInside"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:tint="@color/black" />
+            app:tint="@color/text_primary" />
 
         <!-- Header -->
         <TextView
@@ -33,7 +33,7 @@
             android:text="@string/create_account"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="@color/text_primary"
             app:layout_constraintTop_toBottomOf="@id/backButton"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -165,7 +165,7 @@
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
-                    app:cardBackgroundColor="@color/white">
+                    app:cardBackgroundColor="@color/surface_card">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -179,7 +179,7 @@
                             android:text="@string/user_information"
                             android:textSize="18sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black"
+                            android:textColor="@color/text_primary"
                             android:drawableStart="@drawable/ic_person"
                             android:drawablePadding="8dp"
                             android:drawableTint="@color/green_primary" />
@@ -192,7 +192,7 @@
                             android:text="@string/full_name"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/text_primary" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/nameInputLayout"
@@ -224,7 +224,7 @@
                             android:text="@string/email_address"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/text_primary" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/emailInputLayout"
@@ -256,7 +256,7 @@
                             android:text="@string/phone_optional"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/text_primary" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/phoneInputLayout"
@@ -288,7 +288,7 @@
                             android:text="@string/password"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/text_primary" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/passwordInputLayout"
@@ -321,7 +321,7 @@
                             android:text="@string/confirm_password"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/text_primary" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/confirmPasswordInputLayout"
@@ -363,7 +363,7 @@
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
-                    app:cardBackgroundColor="@color/white">
+                    app:cardBackgroundColor="@color/surface_card">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -377,7 +377,7 @@
                             android:text="@string/farm_information"
                             android:textSize="18sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black"
+                            android:textColor="@color/text_primary"
                             android:drawableStart="@drawable/ic_farm"
                             android:drawablePadding="8dp"
                             android:drawableTint="@color/green_primary" />
@@ -390,7 +390,7 @@
                             android:text="@string/farm_name"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/text_primary" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/farmNameInputLayout"
@@ -422,7 +422,7 @@
                             android:text="@string/farm_location"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/text_primary" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/farmLocationInputLayout"
@@ -454,7 +454,7 @@
                             android:text="@string/farm_size"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/text_primary" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/farmSizeInputLayout"
@@ -487,7 +487,7 @@
                             android:text="@string/crop_types"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/text_primary" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -575,7 +575,7 @@
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
-                    app:cardBackgroundColor="@color/white">
+                    app:cardBackgroundColor="@color/surface_card">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -589,7 +589,7 @@
                             android:text="@string/app_settings"
                             android:textSize="18sp"
                             android:textStyle="bold"
-                            android:textColor="@color/black"
+                            android:textColor="@color/text_primary"
                             android:drawableStart="@drawable/ic_settings"
                             android:drawablePadding="8dp"
                             android:drawableTint="@color/green_primary" />
@@ -613,7 +613,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="@string/push_notifications"
                                     android:textSize="16sp"
-                                    android:textColor="@color/black" />
+                                    android:textColor="@color/text_primary" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -658,7 +658,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="@string/email_alerts"
                                     android:textSize="16sp"
-                                    android:textColor="@color/black" />
+                                    android:textColor="@color/text_primary" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -691,7 +691,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/language"
                             android:textSize="16sp"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/text_primary" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/languageInputLayout"
@@ -725,7 +725,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/theme"
                             android:textSize="16sp"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/text_primary" />
 
                         <RadioGroup
                             android:id="@+id/themeRadioGroup"

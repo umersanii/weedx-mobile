@@ -39,14 +39,6 @@ object RepositoryModule {
     
     @Provides
     @Singleton
-    fun provideMonitoringRepository(
-        monitoringApiService: MonitoringApiService
-    ): MonitoringRepository {
-        return MonitoringRepository(monitoringApiService)
-    }
-    
-    @Provides
-    @Singleton
     fun provideWeedLogsRepository(
         weedLogsApiService: WeedLogsApiService
     ): WeedLogsRepository {

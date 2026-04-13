@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:text="Mon"
         android:textSize="14sp"
-        android:textColor="@color/black" />
+        android:textColor="@color/text_primary" />
 
     <!-- Weather Icon -->
     <ImageView
@@ -51,7 +51,7 @@
             android:text="26°"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/black" />
+            android:textColor="@color/text_primary" />
 
         <TextView
             android:id="@+id/minTemp"

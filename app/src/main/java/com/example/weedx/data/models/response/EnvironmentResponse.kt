@@ -42,7 +42,5 @@ data class SoilData(
     val ph: Double,
     val nitrogen: Double?,
     val phosphorus: Double?,
-    val potassium: Double?,
-    @SerializedName("recorded_at")
-    val timestamp: String?
+    val potassium: Double?
 )

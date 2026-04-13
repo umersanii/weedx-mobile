@@ -34,9 +34,6 @@
             android:name=".DashboardActivity"
             android:exported="false" />
         <activity
-            android:name=".LiveMonitoringActivity"
-            android:exported="false" />
-        <activity
             android:name=".WeedLogsActivity"
             android:exported="false" />
         <activity

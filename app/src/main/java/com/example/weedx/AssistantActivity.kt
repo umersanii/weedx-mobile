@@ -3,6 +3,7 @@ package com.example.weedx
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.ScrollView
@@ -73,6 +74,10 @@ class AssistantActivity : AppCompatActivity() {
         setupClickListeners()
         setupBottomNavigation()
         observeViewModel()
+
+        initialContentScrollView.startAnimation(
+            AnimationUtils.loadAnimation(this, R.anim.slide_up_fade_in)
+        )
     }
 
     private fun setupRecyclerView() {
@@ -153,12 +158,14 @@ class AssistantActivity : AppCompatActivity() {
                 R.id.nav_home -> {
                     val intent = Intent(this, DashboardActivity::class.java)
                     startActivity(intent)
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     finish()
                     true
                 }
                 R.id.nav_weather -> {
                     val intent = Intent(this, WeatherActivity::class.java)
                     startActivity(intent)
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     finish()
                     true
                 }
@@ -166,15 +173,17 @@ class AssistantActivity : AppCompatActivity() {
                     // Already on assistant
                     true
                 }
-                R.id.nav_images -> {
-                    val intent = Intent(this, ImageGalleryActivity::class.java)
+                R.id.nav_weed_logs -> {
+                    val intent = Intent(this, WeedLogsActivity::class.java)
                     startActivity(intent)
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     finish()
                     true
                 }
                 R.id.nav_profile -> {
                     val intent = Intent(this, ProfileActivity::class.java)
                     startActivity(intent)
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     finish()
                     true
                 }

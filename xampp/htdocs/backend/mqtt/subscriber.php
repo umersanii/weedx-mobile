@@ -21,7 +21,7 @@ use PhpMqtt\Client\MqttClient;
 use PhpMqtt\Client\ConnectionSettings;
 
 // MQTT Configuration
-$mqttHost = 'localhost';
+$mqttHost = 'sanilinux.mullet-bull.ts.net';
 $mqttPort = 1883;
 $mqttUsername = null; // Set if MQTT broker requires authentication
 $mqttPassword = null;
@@ -34,7 +34,11 @@ $topics = [
     'weedx/robot/battery' => 1,
     'weedx/weed/detection' => 1,
     'weedx/sensor/soil' => 1,
-    'weedx/alert' => 1
+    'weedx/alert' => 1,
+    // Robot bridge topics (raspberry-pi mqtt_bridge_node)
+    'robot/status' => 1,
+    'robot/detections' => 1,
+    'robot/odom' => 1,
 ];
 
 // Database connection
@@ -96,38 +100,71 @@ function handleMessage($topic, $message, $db, $firebaseService) {
     echo "[" . date('Y-m-d H:i:s') . "] Received message on topic: {$topic}\n";
     
     $data = json_decode($message, true);
-    
-    if (!$data) {
-        echo "Invalid JSON data\n";
-        return;
-    }
-    
+
     try {
         switch ($topic) {
             case 'weedx/robot/status':
+                if (!$data) { echo "Invalid JSON data\n"; return; }
                 updateRobotStatus($data, $db);
                 break;
-                
+
             case 'weedx/robot/location':
+                if (!$data) { echo "Invalid JSON data\n"; return; }
                 updateRobotLocation($data, $db);
                 break;
-                
+
             case 'weedx/robot/battery':
+                if (!$data) { echo "Invalid JSON data\n"; return; }
                 updateBatteryLevel($data, $db);
                 break;
-                
+
             case 'weedx/weed/detection':
+                if (!$data) { echo "Invalid JSON data\n"; return; }
                 saveWeedDetection($data, $db);
                 break;
-                
+
             case 'weedx/sensor/soil':
+                if (!$data) { echo "Invalid JSON data\n"; return; }
                 saveSoilData($data, $db);
                 break;
-                
+
             case 'weedx/alert':
+                if (!$data) { echo "Invalid JSON data\n"; return; }
                 saveAlert($data, $db, $firebaseService);
                 break;
-                
+
+            // Robot bridge topics
+            case 'robot/status':
+                // Publishes a plain string like "running (tick 1)"
+                $status = (stripos($message, 'run') !== false || stripos($message, 'active') !== false) ? 'active' : 'offline';
+                updateRobotStatus(['status' => $status, 'activity' => $message], $db);
+                break;
+
+            case 'robot/detections':
+                // {"detections": [{"class": "weed", "confidence": 0.91, "bbox": [...]}], "timestamp": ...}
+                if (!$data || empty($data['detections'])) { echo "Invalid JSON data\n"; return; }
+                foreach ($data['detections'] as $det) {
+                    saveWeedDetection([
+                        'weed_type'  => $det['class'] ?? 'unknown',
+                        'crop_type'  => 'unknown',
+                        'confidence' => isset($det['confidence']) ? round($det['confidence'] * 100, 2) : 0,
+                        'latitude'   => 0.0,
+                        'longitude'  => 0.0,
+                    ], $db);
+                }
+                break;
+
+            case 'robot/odom':
+                // {"x": 0.1, "y": 0.0, "theta": 0.0, "vx": 0.2}
+                if (!$data) { echo "Invalid JSON data\n"; return; }
+                updateRobotLocation([
+                    'latitude'  => $data['x'] ?? 0,
+                    'longitude' => $data['y'] ?? 0,
+                    'speed'     => $data['vx'] ?? 0,
+                    'heading'   => $data['theta'] ?? 0,
+                ], $db);
+                break;
+
             default:
                 echo "Unknown topic: {$topic}\n";
         }

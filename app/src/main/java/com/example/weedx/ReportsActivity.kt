@@ -2,6 +2,7 @@ package com.example.weedx
 
 import android.app.AlertDialog
 import android.app.DownloadManager
+import android.view.animation.AnimationUtils
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -98,6 +99,11 @@ class ReportsActivity : AppCompatActivity() {
         // Load data
         viewModel.loadReports()
         viewModel.loadTrend()
+
+        // Entrance animation
+        findViewById<View>(R.id.contentLayout)?.startAnimation(
+            AnimationUtils.loadAnimation(this, R.anim.slide_up_fade_in)
+        )
     }
 
     private fun initViews() {
@@ -246,15 +252,15 @@ class ReportsActivity : AppCompatActivity() {
         when (period) {
             Period.WEEKLY -> {
                 weeklyTab.setBackgroundResource(R.drawable.tab_selected_green)
-                weeklyTab.setTextColor(Color.WHITE)
+                weeklyTab.setTextColor(getColor(R.color.white))
                 monthlyTab.background = null
-                monthlyTab.setTextColor(Color.BLACK)
+                monthlyTab.setTextColor(getColor(R.color.gray_text))
             }
             Period.MONTHLY -> {
                 monthlyTab.setBackgroundResource(R.drawable.tab_selected_green)
-                monthlyTab.setTextColor(Color.WHITE)
+                monthlyTab.setTextColor(getColor(R.color.white))
                 weeklyTab.background = null
-                weeklyTab.setTextColor(Color.BLACK)
+                weeklyTab.setTextColor(getColor(R.color.gray_text))
             }
         }
     }
@@ -480,16 +486,19 @@ class ReportsActivity : AppCompatActivity() {
                 when (item.itemId) {
                     R.id.nav_home -> {
                         startActivity(Intent(this, DashboardActivity::class.java))
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                         finish()
                         true
                     }
                     R.id.nav_weather -> {
-                        startActivity(Intent(this, LiveMonitoringActivity::class.java))
+                        startActivity(Intent(this, WeatherActivity::class.java))
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                         finish()
                         true
                     }
                     R.id.nav_profile -> {
                         startActivity(Intent(this, ProfileActivity::class.java))
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                         finish()
                         true
                     }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
@@ -78,6 +79,11 @@ class WeedLogsActivity : AppCompatActivity() {
         
         // Load data
         viewModel.loadWeedLogs()
+
+        // Entrance animation
+        findViewById<View>(R.id.contentLayout)?.startAnimation(
+            AnimationUtils.loadAnimation(this, R.anim.slide_up_fade_in)
+        )
     }
 
     private fun initializeViews() {
@@ -265,31 +271,35 @@ class WeedLogsActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     startActivity(Intent(this, DashboardActivity::class.java))
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     finish()
                     true
                 }
                 R.id.nav_weather -> {
                     startActivity(Intent(this, WeatherActivity::class.java))
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     finish()
                     true
                 }
                 R.id.nav_assistant -> {
                     startActivity(Intent(this, AssistantActivity::class.java))
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     finish()
                     true
                 }
-                R.id.nav_images -> {
-                    startActivity(Intent(this, ImageGalleryActivity::class.java))
-                    finish()
+                R.id.nav_weed_logs -> {
+                    // Already on weed logs
                     true
                 }
                 R.id.nav_profile -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
                     finish()
                     true
                 }
                 else -> false
             }
         }
+        bottomNavigation.selectedItemId = R.id.nav_weed_logs
     }
 }

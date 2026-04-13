@@ -32,9 +32,6 @@ try {
     $stmt->bindParam(':message', $query);
     $stmt->execute();
     
-    // TODO: Integrate with actual AI/LLM API (OpenAI, Anthropic, etc.)
-    // For now, provide simple keyword-based responses
-    
     $response = generateResponse($query);
     
     // Save bot response to history
@@ -57,55 +54,50 @@ try {
 }
 
 function generateResponse($query) {
-    $query = strtolower($query);
-    
-    // Weed detection queries
-    if ((strpos($query, 'weed') !== false && strpos($query, 'today') !== false) ||
-        strpos($query, 'how many weeds') !== false) {
-        return "Today, 142 weeds have been detected across Field A. The most common types are Dandelion (45%), Crabgrass (30%), and Thistle (25%). The detection rate has increased by 12% compared to yesterday. Would you like details on any specific weed type?";
+    $apiKey = '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';
+    $model = 'google/gemma-4-26b-a4b-it:free';
+    $url = 'https://openrouter.ai/api/v1/chat/completions';
+
+    $systemPrompt = "You are WeedX Assistant, an AI helper exclusively for the WeedX precision farming application. " .
+        "You ONLY answer questions related to: weed detection and treatment, robot status and battery, " .
+        "crop health, soil conditions, weather for farming, field reports, and general farming advice within the app. " .
+        "If the user asks anything unrelated to the WeedX app or farming, politely refuse and remind them " .
+        "that you can only assist with WeedX app topics. Do not answer general knowledge, coding, politics, " .
+        "entertainment, or any other off-topic questions. Be concise.";
+
+    $payload = json_encode([
+        'model' => $model,
+        'messages' => [
+            ['role' => 'system', 'content' => $systemPrompt],
+            ['role' => 'user', 'content' => $query]
+        ],
+        'reasoning' => ['enabled' => true]
+    ]);
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $apiKey
+    ]);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+    $result = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($result === false || $httpCode !== 200) {
+        return "Sorry, I'm having trouble connecting to the AI service right now. Please try again later.";
     }
-    
-    if (strpos($query, 'weed') !== false) {
-        return "Based on your recent data, I've detected several common weeds in your field. The most prevalent are broadleaf weeds, which are best treated early in the morning. Your robot has treated 89% of detected weeds successfully today. Would you like specific treatment recommendations?";
+
+    $decoded = json_decode($result, true);
+    $content = $decoded['choices'][0]['message']['content'] ?? null;
+
+    if (!$content) {
+        return "Sorry, I received an unexpected response. Please try again.";
     }
-    
-    // Battery queries
-    if (strpos($query, 'battery') !== false) {
-        return "The robot's battery level is at 87%. Current status:\n• Estimated runtime: ~4 hours remaining\n• Charging status: Not charging\n• Battery health: Good\n• Last full charge: 6 hours ago\n\nThe battery is sufficient to complete the current field operation.";
-    }
-    
-    // Robot status queries
-    if ((strpos($query, 'robot') !== false && strpos($query, 'doing') !== false) ||
-        strpos($query, 'robot') !== false && strpos($query, 'status') !== false ||
-        strpos($query, 'what is the robot') !== false) {
-        return "The robot is currently active in Field A, Zone 12.\n\n📍 Location: A-12 (coordinates: 45.123, -93.456)\n⚡ Speed: 2.4 km/h\n🔋 Battery: 87%\n🌱 Weeds treated: 47 today\n⏱️ Uptime: 4.2 hours\n\nAll systems are functioning normally. The robot is actively detecting and treating weeds.";
-    }
-    
-    // Weekly summary queries
-    if (strpos($query, 'weekly') !== false || strpos($query, 'summary') !== false ||
-        strpos($query, 'week') !== false) {
-        return "📊 Weekly Summary Report (Nov 22-28, 2024)\n\n🌱 Weeds Detected: 856 total\n   • Dandelion: 385\n   • Crabgrass: 257\n   • Thistle: 214\n\n📏 Area Covered: 42.5 hectares\n💧 Herbicide Used: 18.6L (targeted treatment)\n⚡ Efficiency: 95.2%\n⏱️ Total Operating Hours: 34.5h\n\nTrend: Weed detection is down 8% compared to last week, indicating effective treatment.";
-    }
-    
-    // Weather queries
-    if (strpos($query, 'weather') !== false) {
-        return "Current weather conditions are favorable for farming operations:\n\n🌡️ Temperature: 22°C\n💨 Wind: 12 km/h NW\n💧 Humidity: 65%\n☀️ UV Index: 4 (Moderate)\n\nConditions are optimal for herbicide application. No rain expected for the next 6 hours.";
-    }
-    
-    // Soil queries
-    if (strpos($query, 'soil') !== false) {
-        return "Current soil conditions:\n\n💧 Moisture: 42% (Optimal range: 35-50%)\n🌡️ Temperature: 18°C\n📊 pH Level: 6.8 (Good)\n🧪 Nitrogen: Moderate\n\nRecommendation: Consider nitrogen supplementation in the northern section of your farm for better crop yield.";
-    }
-    
-    // Crop queries
-    if (strpos($query, 'crop') !== false) {
-        return "Your crops are in good health based on recent monitoring:\n\n🌾 Growth Stage: Vegetative\n💚 Health Index: 92%\n⚠️ Stress Level: Low\n\nTips:\n• Monitor for early signs of stress in hot weather\n• Ensure adequate watering during peak growth periods\n• Current weed pressure is moderate";
-    }
-    
-    // Help/general queries
-    if (strpos($query, 'help') !== false || strpos($query, 'what can you') !== false) {
-        return "I can help you with:\n\n🌱 Weed Information - Detection counts, types, treatment status\n🤖 Robot Status - Location, battery, speed, activity\n📊 Reports - Daily/weekly summaries, efficiency metrics\n🌤️ Weather - Current conditions, forecasts\n🌍 Soil - Moisture, pH, nutrients\n🌾 Crops - Health status, recommendations\n\nJust ask me anything about your farm!";
-    }
-    
-    return "I'm here to help you with your precision farming needs! You can ask me about:\n\n• Weed detection and treatment\n• Robot status and battery\n• Weekly/daily summaries\n• Weather conditions\n• Soil health\n• Crop recommendations\n\nWhat would you like to know?";
+
+    return $content;
 }

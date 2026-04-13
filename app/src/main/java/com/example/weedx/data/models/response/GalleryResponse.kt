@@ -2,6 +2,12 @@ package com.example.weedx.data.models.response
 
 import com.google.gson.annotations.SerializedName
 
+data class Location(
+    val latitude: Double,
+    val longitude: Double,
+    val accuracy: Double? = null
+)
+
 data class GalleryImage(
     val id: Int,
     val url: String,

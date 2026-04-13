@@ -1,0 +1,15 @@
+[Unit]
+Description=WeedX MQTT Subscriber
+After=network.target mysql.service mosquitto.service
+Wants=mysql.service mosquitto.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/php /home/sani/c0d3/weedx-mobile/xampp/htdocs/backend/mqtt/subscriber.php
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

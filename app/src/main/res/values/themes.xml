@@ -1,11 +1,39 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.WeedX" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <!-- Base application theme — light, green-accented, Material3 -->
+    <style name="Base.Theme.WeedX" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Brand colors -->
+        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/green_light</item>
+        <item name="colorOnPrimaryContainer">@color/green_dark</item>
+
+        <!-- Secondary / accent -->
+        <item name="colorSecondary">@color/green_accent</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/green_light</item>
+        <item name="colorOnSecondaryContainer">@color/green_dark</item>
+
+        <!-- Tertiary highlight -->
+        <item name="colorTertiary">@color/green_accent</item>
+        <item name="colorOnTertiary">@color/white</item>
+
+        <!-- Background + surface -->
+        <item name="android:colorBackground">@color/background_light</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+        <item name="colorSurface">@color/surface_card</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorSurfaceVariant">@color/surface_elevated</item>
+        <item name="colorOnSurfaceVariant">@color/gray_text</item>
+
+        <!-- Outline + error -->
+        <item name="colorOutline">@color/gray_border</item>
+        <item name="colorError">@color/red_primary</item>
+        <item name="colorOnError">@color/white</item>
+
+        <!-- System bars — transparent, dark icons on light bg -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
     </style>
 
     <style name="Theme.WeedX" parent="Base.Theme.WeedX" />

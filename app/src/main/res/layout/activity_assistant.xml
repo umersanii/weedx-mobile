@@ -12,10 +12,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="16dp"
         android:gravity="center_vertical"
-        android:background="@color/white"
-        android:elevation="2dp"
+        android:background="@color/green_primary"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -25,7 +27,7 @@
             android:layout_height="40dp"
             app:cardCornerRadius="20dp"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="@color/green_light">
+            app:cardBackgroundColor="#33FFFFFF">
 
             <ImageView
                 android:layout_width="24dp"
@@ -47,16 +49,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/weedx_assistant"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/black" />
+                android:textColor="@color/white" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/ask_me_anything"
                 android:textSize="12sp"
-                android:textColor="@color/gray_text" />
+                android:textColor="@color/header_subtitle" />
 
         </LinearLayout>
 
@@ -100,7 +102,7 @@
                 android:layout_marginTop="16dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="1dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardBackgroundColor="@color/surface_card">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -108,7 +110,7 @@
                     android:padding="16dp"
                     android:text="@string/assistant_greeting"
                     android:textSize="14sp"
-                    android:textColor="@color/black"
+                    android:textColor="@color/text_primary"
                     android:lineSpacingExtra="4dp" />
 
             </androidx.cardview.widget.CardView>
@@ -131,7 +133,7 @@
                 android:layout_marginTop="12dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/white"
+                app:cardBackgroundColor="@color/surface_elevated"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackground">
@@ -142,7 +144,7 @@
                     android:padding="16dp"
                     android:text="@string/question_weeds_today"
                     android:textSize="14sp"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/text_primary" />
 
             </androidx.cardview.widget.CardView>
 
@@ -154,7 +156,7 @@
                 android:layout_marginTop="12dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/white"
+                app:cardBackgroundColor="@color/surface_elevated"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackground">
@@ -165,7 +167,7 @@
                     android:padding="16dp"
                     android:text="@string/question_battery_status"
                     android:textSize="14sp"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/text_primary" />
 
             </androidx.cardview.widget.CardView>
 
@@ -177,7 +179,7 @@
                 android:layout_marginTop="12dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/white"
+                app:cardBackgroundColor="@color/surface_elevated"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackground">
@@ -188,7 +190,7 @@
                     android:padding="16dp"
                     android:text="@string/question_robot_doing"
                     android:textSize="14sp"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/text_primary" />
 
             </androidx.cardview.widget.CardView>
 
@@ -200,7 +202,7 @@
                 android:layout_marginTop="12dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/white"
+                app:cardBackgroundColor="@color/surface_elevated"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackground">
@@ -211,7 +213,7 @@
                     android:padding="16dp"
                     android:text="@string/question_weekly_summary"
                     android:textSize="14sp"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/text_primary" />
 
             </androidx.cardview.widget.CardView>
 
@@ -225,7 +227,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@color/white"
+        android:background="@color/surface_card"
         android:elevation="8dp"
         android:padding="16dp"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
@@ -258,7 +260,7 @@
                     android:paddingEnd="20dp"
                     android:background="@android:color/transparent"
                     android:textSize="14sp"
-                    android:textColor="@color/black"
+                    android:textColor="@color/text_primary"
                     android:textColorHint="@color/gray_text"
                     android:maxLines="4"
                     android:inputType="textMultiLine|textCapSentences" />
@@ -274,7 +276,7 @@
                 app:tint="@color/white"
                 app:backgroundTint="@color/green_primary"
                 app:fabSize="normal"
-                app:elevation="0dp"
+                app:elevation="4dp"
                 android:contentDescription="@string/send" />
 
         </LinearLayout>
@@ -286,7 +288,7 @@
         android:id="@+id/bottomNavigation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/nav_background"
         app:elevation="8dp"
         app:itemIconTint="@drawable/bottom_nav_color"
         app:itemTextColor="@drawable/bottom_nav_color"

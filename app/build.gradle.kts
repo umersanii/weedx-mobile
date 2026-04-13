@@ -18,6 +18,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "BACKEND_BASE_URL", "\"http://sanilinux.mullet-bull.ts.net/weedx-backend/\"")
+        buildConfigField("String", "IMAGE_BASE_URL", "\"http://sanilinux.mullet-bull.ts.net/weedx-backend\"")
     }
 
     buildTypes {
@@ -39,6 +41,7 @@ android {
     
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 

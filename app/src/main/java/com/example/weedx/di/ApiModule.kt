@@ -29,12 +29,6 @@ object ApiModule {
     
     @Provides
     @Singleton
-    fun provideMonitoringApiService(retrofit: Retrofit): MonitoringApiService {
-        return retrofit.create(MonitoringApiService::class.java)
-    }
-    
-    @Provides
-    @Singleton
     fun provideWeedLogsApiService(retrofit: Retrofit): WeedLogsApiService {
         return retrofit.create(WeedLogsApiService::class.java)
     }

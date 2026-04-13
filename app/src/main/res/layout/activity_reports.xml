@@ -52,6 +52,75 @@
 
     </LinearLayout>
 
+    <!-- Pinned Green Header -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/green_primary"
+        app:elevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="16dp"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reports"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/performance_analytics"
+                    android:textSize="13sp"
+                    android:textColor="@color/header_subtitle" />
+
+            </LinearLayout>
+
+            <!-- Download Button -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/downloadButton"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#33FFFFFF"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_download"
+                    app:tint="@color/white"
+                    android:contentDescription="@string/download" />
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
     <!-- Main Content -->
     <ScrollView
         android:id="@+id/contentLayout"
@@ -68,69 +137,13 @@
             android:padding="16dp"
             android:paddingBottom="80dp">
 
-            <!-- Header with Download Button -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/reports"
-                        android:textSize="24sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/black"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/performance_analytics"
-                        android:textSize="14sp"
-                        android:textColor="@color/gray_text" />
-
-                </LinearLayout>
-
-                <!-- Download Button -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/downloadButton"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp"
-                    app:cardBackgroundColor="@color/white"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?android:attr/selectableItemBackground">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_download"
-                        app:tint="@color/gray_text"
-                        android:contentDescription="@string/download" />
-
-                </androidx.cardview.widget.CardView>
-
-            </LinearLayout>
-
             <!-- Period Toggle -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:orientation="horizontal"
-                android:background="@color/white"
+                android:background="@color/surface_card"
                 android:padding="4dp"
                 android:weightSum="2">
 
@@ -156,7 +169,7 @@
                     android:text="@string/monthly"
                     android:gravity="center"
                     android:textSize="14sp"
-                    android:textColor="@color/black"
+                    android:textColor="@color/text_primary"
                     android:background="@android:color/transparent"
                     android:clickable="true"
                     android:focusable="true" />
@@ -185,7 +198,7 @@
                         android:layout_height="wrap_content"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="2dp"
-                        app:cardBackgroundColor="@color/white">
+                        app:cardBackgroundColor="@color/surface_card">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -208,7 +221,7 @@
                                 android:text="--"
                                 android:textSize="32sp"
                                 android:textStyle="bold"
-                                android:textColor="@color/black" />
+                                android:textColor="@color/text_primary" />
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -246,7 +259,7 @@
                         android:layout_marginTop="16dp"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="2dp"
-                        app:cardBackgroundColor="@color/white">
+                        app:cardBackgroundColor="@color/surface_card">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -269,7 +282,7 @@
                                 android:text="--"
                                 android:textSize="32sp"
                                 android:textStyle="bold"
-                                android:textColor="@color/black" />
+                                android:textColor="@color/text_primary" />
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -316,7 +329,7 @@
                         android:layout_height="wrap_content"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="2dp"
-                        app:cardBackgroundColor="@color/white">
+                        app:cardBackgroundColor="@color/surface_card">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -339,7 +352,7 @@
                                 android:text="--"
                                 android:textSize="32sp"
                                 android:textStyle="bold"
-                                android:textColor="@color/black" />
+                                android:textColor="@color/text_primary" />
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -377,7 +390,7 @@
                         android:layout_marginTop="16dp"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="2dp"
-                        app:cardBackgroundColor="@color/white">
+                        app:cardBackgroundColor="@color/surface_card">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -400,7 +413,7 @@
                                 android:text="--"
                                 android:textSize="32sp"
                                 android:textStyle="bold"
-                                android:textColor="@color/black" />
+                                android:textColor="@color/text_primary" />
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -442,7 +455,7 @@
                 android:layout_marginTop="16dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardBackgroundColor="@color/surface_card">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -456,7 +469,7 @@
                         android:text="@string/weed_detection_trend"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@color/black" />
+                        android:textColor="@color/text_primary" />
 
                     <!-- Chart -->
                     <androidx.recyclerview.widget.RecyclerView
@@ -479,7 +492,7 @@
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardBackgroundColor="@color/surface_card">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -493,7 +506,7 @@
                         android:text="@string/weed_type_distribution"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@color/black" />
+                        android:textColor="@color/text_primary" />
 
                     <!-- Distribution List -->
                     <androidx.recyclerview.widget.RecyclerView
@@ -518,10 +531,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@color/white"
+        android:background="@color/nav_background"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_navigation_menu"
-        app:itemIconTint="@color/bottom_nav_color"
-        app:itemTextColor="@color/bottom_nav_color" />
+        app:itemIconTint="@drawable/bottom_nav_color"
+        app:itemTextColor="@drawable/bottom_nav_color" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

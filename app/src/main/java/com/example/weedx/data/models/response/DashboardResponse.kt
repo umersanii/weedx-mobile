@@ -13,8 +13,6 @@ data class DashboardResponse(
 
 data class RobotStatus(
     val battery: Int,
-    val latitude: Double?,
-    val longitude: Double?,
     val speed: Double?,
     val status: String,
     @SerializedName("last_updated")
@@ -27,9 +25,7 @@ data class TodaySummary(
     @SerializedName("area_covered")
     val areaCovered: Double,
     @SerializedName("herbicide_used")
-    val herbicideUsed: Double,
-    @SerializedName("session_duration")
-    val sessionDuration: Int?
+    val herbicideUsed: Double
 )
 
 data class Alert(
